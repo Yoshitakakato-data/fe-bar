@@ -1,0 +1,11 @@
+command: ["gunicorn", "app:app", "--bind", "0.0.0.0:8080", "--workers", "2"]
+
+env:
+  - name: PGHOST
+    valueFrom: lakebase-fraud-ops-host      # Lakebase接続情報（Appのリソース/シークレットで注入）
+  - name: PGDATABASE
+    value: databricks_postgres
+  - name: PGUSER
+    valueFrom: lakebase-fraud-ops-user
+  - name: PGPASSWORD
+    valueFrom: lakebase-fraud-ops-token      # OAuthトークン

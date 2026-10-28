@@ -1,0 +1,95 @@
+Genie Room 相当 — 自然言語質問に対する実データ回答
+========================================================================
+
+Q1. 先週レビュー対象になった取引のうち、判定ポリシー別の件数と平均不正スコアは？
+  [生成SQL]
+    SELECT decision_policy,
+    COUNT(*)                AS 件数,
+    ROUND(AVG(fraud_score),3) AS 平均スコア,
+    ROUND(SUM(amount),0)      AS 合計金額
+    FROM fraud_alerts
+    GROUP BY decision_policy
+    ORDER BY 平均スコア DESC;
+  [回答]
+  decision_policy | 件数    | 平均スコア | 合計金額       
+  ----------------+-------+-------+------------
+  BLOCK_CANDIDATE | 76    | 0.721 | 8423149.0  
+  REVIEW          | 421   | 0.268 | 51870702.0 
+  AUTO_APPROVE    | 17503 | 0.02  | 998379827.0
+
+Q2. 高リスク国宛でブロック候補になっている送金トップ5を金額順で見せて
+  [生成SQL]
+    SELECT txn_id, customer_id, payee_country, ROUND(amount,0) AS 金額,
+    ROUND(fraud_score,3) AS スコア
+    FROM fraud_alerts
+    WHERE is_high_risk_country = 1 AND decision_policy = 'BLOCK_CANDIDATE'
+    ORDER BY amount DESC
+    LIMIT 5;
+  [回答]
+  txn_id   | customer_id | payee_country | 金額       | スコア  
+  ---------+-------------+---------------+----------+------
+  T0003367 | C001446     | XC            | 890677.0 | 0.661
+  T0054766 | C002287     | XB            | 624161.0 | 0.759
+  T0013831 | C001509     | XA            | 367915.0 | 0.661
+  T0021015 | C002035     | XC            | 348552.0 | 0.661
+  T0013713 | C003017     | XA            | 339653.0 | 0.661
+
+Q3. 誤検知が多いのはどのセグメント？ 海外送金か国内かで、レビュー帯の的中率(precision)を比較して
+  [生成SQL]
+    SELECT CASE WHEN is_foreign=1 THEN '海外' ELSE '国内' END AS セグメント,
+    COUNT(*)                                   AS レビュー件数,
+    SUM(is_fraud)                              AS 実不正,
+    ROUND(1.0*SUM(is_fraud)/COUNT(*),3)        AS 的中率
+    FROM fraud_alerts
+    WHERE fraud_score >= 0.10
+    GROUP BY セグメント
+    ORDER BY 的中率 DESC;
+  [回答]
+  セグメント | レビュー件数 | 実不正 | 的中率  
+  ------+--------+-----+------
+  海外    | 272    | 134 | 0.493
+  国内    | 225    | 56  | 0.249
+
+Q4. 時間帯別の不正発生件数は？ 深夜に偏っている？
+  [生成SQL]
+    SELECT CASE WHEN hour_of_day BETWEEN 0 AND 5 THEN '深夜(0-5時)'
+    WHEN hour_of_day BETWEEN 6 AND 11 THEN '午前(6-11時)'
+    WHEN hour_of_day BETWEEN 12 AND 17 THEN '午後(12-17時)'
+    ELSE '夜(18-23時)' END              AS 時間帯,
+    COUNT(*)      AS 取引件数,
+    SUM(is_fraud) AS 不正件数
+    FROM fraud_alerts
+    GROUP BY 時間帯
+    ORDER BY 不正件数 DESC;
+  [回答]
+  時間帯        | 取引件数 | 不正件数
+  -----------+------+-----
+  深夜(0-5時)   | 1697 | 124 
+  夜(18-23時)  | 3615 | 92  
+  午前(6-11時)  | 5568 | 83  
+  午後(12-17時) | 7120 | 79  
+
+Q5. 端末変更ありの取引は、なしと比べて不正率が何倍高い？
+  [生成SQL]
+    SELECT CASE WHEN device_change=1 THEN '端末変更あり' ELSE '端末変更なし' END AS 区分,
+    COUNT(*)                             AS 件数,
+    ROUND(100.0*SUM(is_fraud)/COUNT(*),2) AS 不正率pct
+    FROM fraud_alerts
+    GROUP BY 区分
+    ORDER BY 不正率pct DESC;
+  [回答]
+  区分     | 件数    | 不正率pct
+  -------+-------+-------
+  端末変更あり | 1099  | 18.02 
+  端末変更なし | 16901 | 1.07  
+
+Q6. いまPENDING(未判定)のブロック候補は何件あって、合計いくら止められる可能性がある？
+  [生成SQL]
+    SELECT COUNT(*) AS 未判定ブロック候補,
+    ROUND(SUM(amount),0) AS 保全対象金額
+    FROM fraud_alerts
+    WHERE decision_policy='BLOCK_CANDIDATE' AND review_status='PENDING';
+  [回答]
+  未判定ブロック候補 | 保全対象金額   
+  ----------+----------
+  76        | 8423149.0

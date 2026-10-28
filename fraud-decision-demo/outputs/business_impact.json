@@ -1,0 +1,39 @@
+{
+  "assumptions": {
+    "false_positive_cost_jpy": 3200,
+    "analyst_min_baseline": 14.0,
+    "analyst_min_with_reasons": 5.0,
+    "analyst_cost_per_min_jpy": 60,
+    "review_threshold": 0.1,
+    "block_threshold": 0.6,
+    "holdout_rows": 18000,
+    "annualize_scale": 13.519
+  },
+  "current": {
+    "review_count": 5719,
+    "fraud_blocked_jpy": 35828836.38,
+    "friction_count": 5395,
+    "review_hours": 1334.4333333333334,
+    "friction_cost_jpy": 17264000,
+    "analyst_cost_jpy": 4803960.0,
+    "net_jpy": 13760876.380000003
+  },
+  "proposed": {
+    "review_count": 497,
+    "fraud_blocked_jpy": 21489919.72,
+    "friction_count": 11,
+    "review_hours": 41.416666666666664,
+    "friction_cost_jpy": 35200,
+    "analyst_cost_jpy": 149100.0,
+    "net_jpy": 21305619.72,
+    "standardization_rate": 0.9766111111111111
+  },
+  "delta_annualized": {
+    "review_hours_saved": 17479.66975308642,
+    "friction_count_reduced": 72783.70370370371,
+    "friction_cost_saved_jpy": 232907851.85185185,
+    "analyst_cost_saved_jpy": 62926811.11111111,
+    "net_impact_gain_jpy": 101993752.5592592,
+    "fraud_blocked_proposed_jpy": 290511877.6962963
+  }
+}

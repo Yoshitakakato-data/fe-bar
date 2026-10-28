@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Databricks 実行手順</title>
+<style>
+@page { size: A4; margin: 16mm 15mm; }
+* { box-sizing: border-box; }
+body{
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+  color:#16202e; font-size:10.5pt; line-height:1.6; margin:0;
+}
+.mono{font-family:"SFMono-Regular",Menlo,Consolas,monospace;}
+h1{font-size:20pt;margin:0 0 2pt;color:#0b1524;letter-spacing:.01em}
+.sub{color:#0d9488;font-weight:700;font-size:10pt;letter-spacing:.06em;margin:0 0 14pt}
+h2{font-size:12.5pt;margin:20pt 0 6pt;padding-bottom:4pt;border-bottom:2px solid #0d9488;color:#0b1524}
+h2 .no{color:#0d9488;font-family:monospace;margin-right:8px}
+p{margin:6pt 0}
+.lead{color:#3d4a5c}
+code,.mono{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:9.3pt}
+table{border-collapse:collapse;width:100%;margin:8pt 0;font-size:9.4pt}
+th,td{border:1px solid #d3dae4;padding:6pt 8pt;text-align:left;vertical-align:top}
+th{background:#0b1524;color:#fff;font-weight:600}
+td.n{white-space:nowrap;font-family:monospace;color:#0d9488;font-weight:700;text-align:center;width:26px}
+tbody tr:nth-child(even){background:#f5f8fb}
+.callout{border-left:4px solid #dc2626;background:#fef2f2;padding:8pt 12pt;margin:10pt 0;border-radius:0 6px 6px 0}
+.callout.tip{border-left-color:#0d9488;background:#effbf9}
+.callout b{color:#0b1524}
+ul{margin:6pt 0;padding-left:18px}
+li{margin:3pt 0}
+.path{font-family:monospace;font-size:9pt;color:#334155}
+.foot{margin-top:22pt;padding-top:8pt;border-top:1px solid #d3dae4;color:#64748b;font-size:8.5pt}
+.tag{display:inline-block;background:#eef2f7;border:1px solid #d3dae4;border-radius:20px;padding:1px 9px;font-size:8.5pt;margin:1px}
+.avoid-break{break-inside:avoid}
+</style>
+</head>
+<body>
+
+<h1>不正送金レビュー支援 — Databricks 実行手順</h1>
+<p class="sub">金融 / クラシックML × Databricks — エンドツーエンド・データジャーニー</p>
+<p class="lead">ローカル版（<span class="mono">src/</span>, numpyのみ）と 1:1 対応する Databricks ネイティブ版
+（<span class="mono">databricks/</span>, <span class="mono">app/</span>）の配備手順。列名・しきい値・コスト前提を
+ローカルと一致させてあるため、ローカルで得た数値がそのまま Databricks 上で再現できます。</p>
+
+<h2 class="avoid-break"><span class="no">0</span>前提</h2>
+<p>Unity Catalog 有効ワークスペース ／ Serverless SQL Warehouse ／ MLflow・Model Serving ／ Lakebase が利用可能であること。
+すべて合成データを使用し、実顧客データ・PII は使用しません。</p>
+
+<h2 class="avoid-break"><span class="no">A</span>アップロードするファイル</h2>
+<table>
+<thead><tr><th style="width:40%">何を</th><th style="width:30%">どこへ</th><th>方法</th></tr></thead>
+<tbody>
+<tr><td>Databricks版一式<br><span class="path">databricks/*, app/*</span></td>
+    <td>Workspace</td>
+    <td><b>GitHub に push → Databricks Repos でクローン</b>が最も簡単（個別 import も可）</td></tr>
+<tr><td>合成生データ<br><span class="path">data/raw_transactions.csv</span></td>
+    <td>UC Volume<br><span class="path">/Volumes/fraud_demo/fraud/raw/</span></td>
+    <td>Catalog Explorer の Volume に Upload、または <span class="mono">databricks fs cp</span></td></tr>
+</tbody>
+</table>
+<p><span class="path">src/</span>（ローカル版）とローカル生成物（<span class="path">outputs/, logs/, data/lakebase.sqlite</span>）はアップロード不要です。</p>
+
+<h2 class="avoid-break"><span class="no">B</span>実行順</h2>
+<table>
+<thead><tr><th class="n">#</th><th style="width:33%">実行するもの</th><th style="width:18%">コンポーネント</th><th>補足</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td><span class="path">databricks/02_unity_catalog_setup.sql</span> の<b>上半分</b>（CREATE CATALOG/SCHEMA/VOLUME＋mask関数＋GRANT）</td><td>Unity Catalog</td><td>SQLエディタで実行。GRANT先グループ（<span class="mono">fraud_analysts</span>等）が無ければ該当行は調整/スキップ</td></tr>
+<tr><td class="n">2</td><td><span class="path">data/raw_transactions.csv</span> を手順1で作成した Volume にアップロード</td><td>—</td><td><span class="path">/Volumes/fraud_demo/fraud/raw/</span> へ</td></tr>
+<tr><td class="n">3</td><td><span class="path">databricks/01_lakeflow_ingest.py</span> を <b>Lakeflow パイプライン</b>のソースに指定して実行</td><td>Lakeflow</td><td>ターゲットを <span class="mono">fraud_demo.fraud</span> に設定。bronze/silver/<span class="mono">gold_features</span> が生成される</td></tr>
+<tr><td class="n">4</td><td><span class="path">databricks/03_train_model.py</span> を<b>ノートブック実行</b></td><td>クラシックML</td><td>GBDT学習＋SHAP理由コード → MLflow(UC)登録 → <span class="mono">scored_transactions</span> テーブル書き出し</td></tr>
+<tr><td class="n">5</td><td><span class="path">02_unity_catalog_setup.sql</span> の <span class="mono">ALTER TABLE … SET MASK</span> 行を実行</td><td>Unity Catalog</td><td>★<span class="mono">scored_transactions</span> 生成後（=手順4の後）に実行。PIIマスク付与</td></tr>
+<tr><td class="n">6</td><td><span class="path">databricks/04_lakebase_sync.md</span> の手順（Lakebase インスタンス作成 → synced table → <span class="mono">review_decisions</span> テーブル）</td><td>Lakebase</td><td>Delta→Postgres 同期＋判断の書き込み先を用意</td></tr>
+<tr><td class="n">7</td><td><span class="path">databricks/05_genie_space_setup.md</span> の手順（Genie Space 作成＋サンプル質問6問登録）</td><td>Genie Room</td><td>対象テーブル＝<span class="mono">scored_transactions</span></td></tr>
+<tr><td class="n">8</td><td><span class="path">app/</span> を <span class="mono">databricks apps deploy fraud-review --source-code-path .</span></td><td>Databricks Apps</td><td><span class="mono">app.yaml</span> に Lakebase 接続情報を注入。<span class="mono">app.py</span>(Flask) が起動</td></tr>
+</tbody>
+</table>
+
+<div class="callout avoid-break">
+<b>つまずきやすい2点（意図的に順序依存）</b>
+<ul>
+<li><b>手順5のマスク付与は手順4の後。</b> <span class="mono">scored_transactions</span> が存在してから <span class="mono">ALTER TABLE … SET MASK</span> を実行（1回で全部流すとテーブル未作成でエラー）。</li>
+<li><b>手順3は通常の「Run」ではなく Lakeflow（旧DLT）パイプラインとして作成</b>し、<span class="mono">01_lakeflow_ingest.py</span> をソース指定して起動する。</li>
+</ul>
+</div>
+
+<div class="callout tip avoid-break">
+<b>最短で「動く」を確認するなら</b> 手順 <b>1 → 3 → 4</b> まで（Lakeflow取込 → gold → ML → スコア＋理由コード）で中核が通り、
+<span class="mono">SELECT * FROM fraud_demo.fraud.scored_transactions</span> が実行証跡になります。その後 6→7→8 で運用・探索・公開層を追加。
+</div>
+
+<h2 class="avoid-break"><span class="no">C</span>ローカル ↔ Databricks 対応</h2>
+<table>
+<thead><tr><th style="width:42%">ローカル</th><th style="width:42%">Databricks</th><th>一致点</th></tr></thead>
+<tbody>
+<tr><td><span class="path">src/pipeline.py</span></td><td><span class="path">01_lakeflow_ingest.py</span></td><td>gold派生ロジック・列名</td></tr>
+<tr><td><span class="path">src/gbdt.py</span>（numpy GBDT＋木経路寄与）</td><td><span class="path">03_train_model.py</span>（sklearn＋<span class="mono">shap.TreeExplainer</span>）</td><td>logit空間の加法的寄与＝理由コード</td></tr>
+<tr><td><span class="path">src/load_lakebase.py</span>（sqlite）</td><td><span class="path">04_lakebase_sync.md</span>（Postgres synced table）</td><td><span class="mono">fraud_alerts</span> スキーマ</td></tr>
+<tr><td><span class="path">src/genie_queries.py</span></td><td><span class="path">05_genie_space_setup.md</span></td><td>6つの質問文と対応SQL</td></tr>
+<tr><td><span class="path">app/local_app.py</span>（http.server）</td><td><span class="path">app/app.py</span>（Flask＋psycopg）</td><td>UI・EV計算・判断書き込み</td></tr>
+</tbody>
+</table>
+
+<div class="foot">
+不正送金レビュー支援 — エンドツーエンド・データジャーニー（金融 / クラシックML）。
+数値はすべて合成データに基づく試算で、前提は <span class="mono">src/common.py</span> に一元化。実顧客データ・PII は不使用。
+</div>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+==== fraud-decision-demo local run @ 2026-08-28T05:56:39Z ====
+Python 3.14.4
+numpy 2.4.4
+
+
+########## src/generate_data.py ##########
+[generate_data] rows=60,000  customers=4,000  days=90
+[generate_data] fraud=1,320 (2.20%)  -> /Users/yoshitaka.kato/fraud-decision-demo/data/raw_transactions.csv
+
+
+########## src/pipeline.py ##########
+[pipeline] bronze rows read = 60,000
+[pipeline] silver dropped (invalid) = 0
+[pipeline] gold rows written = 60,000  features=10  -> /Users/yoshitaka.kato/fraud-decision-demo/data/gold_features.csv
+
+
+########## src/train_model.py ##########
+[train] train=42,000 (fraud 942)  test=18,000 (fraud 378)
+[gbdt] tree  30/150  train_logloss=0.0914
+[gbdt] tree  60/150  train_logloss=0.0828
+[gbdt] tree  90/150  train_logloss=0.0785
+[gbdt] tree 120/150  train_logloss=0.0761
+[gbdt] tree 150/150  train_logloss=0.0746
+====================================================================
+不正送金検知モデル — 評価レポート (holdout test)
+====================================================================
+アルゴリズム        : Gradient Boosting Decision Trees (numpy実装, logloss)
+木の本数/深さ/lr    : 150 / 3 / 0.15
+学習/テスト件数     : 42,000 / 18,000
+テスト不正率        : 2.10%  (件数 378)
+ROC-AUC             : 0.8937
+
+ threshold  precision     recall       F1     TP     FP     FN
+      0.10      0.382      0.503    0.434    190    307    188  <- REVIEW
+      0.20      0.489      0.410    0.446    155    162    223
+      0.30      0.531      0.368    0.434    139    123    239
+      0.40      0.689      0.294    0.412    111     50    267
+      0.50      0.789      0.238    0.366     90     24    288
+      0.60      0.855      0.172    0.286     65     11    313  <- BLOCK
+      0.70      0.895      0.090    0.163     34      4    344
+      0.80      0.842      0.042    0.081     16      3    362
+
+Precision@K （スコア上位K件の不正的中率）:
+  Precision@50   = 0.900  （上位50件中 不正 45件）
+  Precision@100  = 0.830  （上位100件中 不正 83件）
+  Precision@200  = 0.620  （上位200件中 不正 124件）
+  Precision@500  = 0.380  （上位500件中 不正 190件）
+
+大域的特徴量重要度（平均|寄与|, logit空間）:
+  0.1831  device_change          普段と異なる端末からの操作
+  0.1247  is_foreign             海外への送金
+  0.0873  amount_to_avg_ratio    送金額が平常時の平均を大きく上回る
+  0.0675  num_txn_24h            短時間に取引が集中（高頻度）
+  0.0473  hour_risk              普段利用しない時間帯（深夜など）
+  0.0298  is_high_risk_country   高リスク国宛の送金
+  0.0245  is_new_payee           初めての送金先
+  0.0007  amount_log             送金額が高額
+  0.0000  account_age_days       口座開設からの経過期間が短い
+  0.0000  sec_since_last_txn     直前取引からの間隔が異常
+[train] scored holdout -> /Users/yoshitaka.kato/fraud-decision-demo/data/scored_transactions.csv (18,000 rows)
+[train] reason code examples -> outputs/reason_codes_examples.txt
+
+
+########## src/business_impact.py ##########
+========================================================================
+ビジネスインパクト — 現状(ルール＋属人レビュー) vs 提案(ML＋理由コード)
+========================================================================
+対象: ホールドアウト 18,000件（90日の30%サンプル）／年換算係数 x13.52
+前提: 誤検知コスト 3,200円/件, 調査 現状14.0分 → 提案5.0分/件, 人件費 60円/分
+しきい値: REVIEW>=0.1, BLOCK>=0.6
+
+指標                                          現状                提案
+------------------------------------------------------------------------
+人手レビュー件数                               5,719               497
+総調査時間(h)                                 1,334                41
+誤検知(顧客摩擦)件数                          5,395                11
+不正阻止額                             35,828,836円       21,489,920円
+誤検知コスト                           17,264,000円           35,200円
+調査人件費                              4,803,960円          149,100円
+ネット金額インパクト                     13,760,876円       21,305,620円
+
+判断標準化率（しきい値で機械的に確定する割合）: 97.7%
+
+―― 年換算のビジネス成果（提案 − 現状）――
+  調査時間削減        : 17,480 時間/年
+  誤検知件数削減      : 72,784 件/年
+  顧客摩擦コスト削減  : 232,907,852円/年
+  調査人件費削減      : 62,926,811円/年
+  不正阻止額(提案)    : 290,511,878円/年
+  ネット改善額        : 101,993,753円/年
+
+
+########## src/load_lakebase.py ##########
+[lakebase] loaded 18,000 rows -> /Users/yoshitaka.kato/fraud-decision-demo/data/lakebase.sqlite
+[lakebase]   AUTO_APPROVE     17,503
+[lakebase]   REVIEW           421
+[lakebase]   BLOCK_CANDIDATE  76
+
+
+########## src/genie_queries.py ##########
+Genie Room 相当 — 自然言語質問に対する実データ回答
+========================================================================
+
+Q1. 先週レビュー対象になった取引のうち、判定ポリシー別の件数と平均不正スコアは？
+  [生成SQL]
+    SELECT decision_policy,
+    COUNT(*)                AS 件数,
+    ROUND(AVG(fraud_score),3) AS 平均スコア,
+    ROUND(SUM(amount),0)      AS 合計金額
+    FROM fraud_alerts
+    GROUP BY decision_policy
+    ORDER BY 平均スコア DESC;
+  [回答]
+  decision_policy | 件数    | 平均スコア | 合計金額       
+  ----------------+-------+-------+------------
+  BLOCK_CANDIDATE | 76    | 0.721 | 8423149.0  
+  REVIEW          | 421   | 0.268 | 51870702.0 
+  AUTO_APPROVE    | 17503 | 0.02  | 998379827.0
+
+Q2. 高リスク国宛でブロック候補になっている送金トップ5を金額順で見せて
+  [生成SQL]
+    SELECT txn_id, customer_id, payee_country, ROUND(amount,0) AS 金額,
+    ROUND(fraud_score,3) AS スコア
+    FROM fraud_alerts
+    WHERE is_high_risk_country = 1 AND decision_policy = 'BLOCK_CANDIDATE'
+    ORDER BY amount DESC
+    LIMIT 5;
+  [回答]
+  txn_id   | customer_id | payee_country | 金額       | スコア  
+  ---------+-------------+---------------+----------+------
+  T0003367 | C001446     | XC            | 890677.0 | 0.661
+  T0054766 | C002287     | XB            | 624161.0 | 0.759
+  T0013831 | C001509     | XA            | 367915.0 | 0.661
+  T0021015 | C002035     | XC            | 348552.0 | 0.661
+  T0013713 | C003017     | XA            | 339653.0 | 0.661
+
+Q3. 誤検知が多いのはどのセグメント？ 海外送金か国内かで、レビュー帯の的中率(precision)を比較して
+  [生成SQL]
+    SELECT CASE WHEN is_foreign=1 THEN '海外' ELSE '国内' END AS セグメント,
+    COUNT(*)                                   AS レビュー件数,
+    SUM(is_fraud)                              AS 実不正,
+    ROUND(1.0*SUM(is_fraud)/COUNT(*),3)        AS 的中率
+    FROM fraud_alerts
+    WHERE fraud_score >= 0.10
+    GROUP BY セグメント
+    ORDER BY 的中率 DESC;
+  [回答]
+  セグメント | レビュー件数 | 実不正 | 的中率  
+  ------+--------+-----+------
+  海外    | 272    | 134 | 0.493
+  国内    | 225    | 56  | 0.249
+
+Q4. 時間帯別の不正発生件数は？ 深夜に偏っている？
+  [生成SQL]
+    SELECT CASE WHEN hour_of_day BETWEEN 0 AND 5 THEN '深夜(0-5時)'
+    WHEN hour_of_day BETWEEN 6 AND 11 THEN '午前(6-11時)'
+    WHEN hour_of_day BETWEEN 12 AND 17 THEN '午後(12-17時)'
+    ELSE '夜(18-23時)' END              AS 時間帯,
+    COUNT(*)      AS 取引件数,
+    SUM(is_fraud) AS 不正件数
+    FROM fraud_alerts
+    GROUP BY 時間帯
+    ORDER BY 不正件数 DESC;
+  [回答]
+  時間帯        | 取引件数 | 不正件数
+  -----------+------+-----
+  深夜(0-5時)   | 1697 | 124 
+  夜(18-23時)  | 3615 | 92  
+  午前(6-11時)  | 5568 | 83  
+  午後(12-17時) | 7120 | 79  
+
+Q5. 端末変更ありの取引は、なしと比べて不正率が何倍高い？
+  [生成SQL]
+    SELECT CASE WHEN device_change=1 THEN '端末変更あり' ELSE '端末変更なし' END AS 区分,
+    COUNT(*)                             AS 件数,
+    ROUND(100.0*SUM(is_fraud)/COUNT(*),2) AS 不正率pct
+    FROM fraud_alerts
+    GROUP BY 区分
+    ORDER BY 不正率pct DESC;
+  [回答]
+  区分     | 件数    | 不正率pct
+  -------+-------+-------
+  端末変更あり | 1099  | 18.02 
+  端末変更なし | 16901 | 1.07  
+
+Q6. いまPENDING(未判定)のブロック候補は何件あって、合計いくら止められる可能性がある？
+  [生成SQL]
+    SELECT COUNT(*) AS 未判定ブロック候補,
+    ROUND(SUM(amount),0) AS 保全対象金額
+    FROM fraud_alerts
+    WHERE decision_policy='BLOCK_CANDIDATE' AND review_status='PENDING';
+  [回答]
+  未判定ブロック候補 | 保全対象金額   
+  ----------+----------
+  76        | 8423149.0
+
+
+########## app/local_app.py --demo ##########
+不正送金レビュー支援アプリ — ヘッドレス実行ログ（App動作の証跡）
+========================================================================
+レビュー待ちキュー: PENDING=497  BLOCKED=0  APPROVED=0
+
+[1] キュー上位10件（スコア降順）＋ ブロック期待価値EV
+    txn_id      score      amount         EV(円)  主な理由
+    T0005814    0.926      10,140         9,155  高リスク国宛の送金
+    T0022047    0.923     119,536       110,078  高リスク国宛の送金
+    T0034792    0.884      24,982        21,721  高リスク国宛の送金
+    T0024726    0.880     104,163        91,266  高リスク国宛の送金
+    T0027394    0.855      51,768        43,799  高リスク国宛の送金
+    T0045897    0.853      46,387        39,110  高リスク国宛の送金
+    T0048088    0.853       6,914         5,430  高リスク国宛の送金
+    T0013816    0.848      89,095        75,107  高リスク国宛の送金
+    T0016381    0.848      59,405        49,917  高リスク国宛の送金
+    T0052572    0.848      30,034        24,996  高リスク国宛の送金
+
+[2] 取引詳細レビュー: T0005814
+    スコア=0.926  金額=10,140円  宛先=XC  EV=9,155円  (ブロック推奨)
+    理由コード:
+      +1.663  高リスク国宛の送金  (is_high_risk_country=1.0)
+      +1.254  普段と異なる端末からの操作  (device_change=1.0)
+      +1.173  送金額が平常時の平均を大きく上回る  (amount_to_avg_ratio=1.3345)
+
+[3] アナリスト判断: T0005814 をブロック -> 運用ストア更新
+    確認: review_status=BLOCKED reviewed_by=demo_analyst decided_at=1787896629
+    キュー更新後: PENDING=496  BLOCKED=1
+
+[app] demo output -> /Users/yoshitaka.kato/fraud-decision-demo/outputs/app_demo_output.txt
+
+==== DONE. Outputs committed under outputs/ ====
