@@ -1,0 +1,84 @@
+{
+  "app": {
+    "name": "yoshitaka-kato-fraud-review",
+    "url": "https://yoshitaka-kato-fraud-review-7474659820190227.aws.databricksapps.com",
+    "app_status": {
+      "message": "App has status: App has not been deployed yet. Run your app by deploying source code",
+      "state": "UNAVAILABLE"
+    },
+    "compute_status": {
+      "message": "App compute is running.",
+      "state": "ACTIVE"
+    },
+    "service_principal_client_id": "91f03d2b-a005-4ece-9827-ddbddd091f9d",
+    "resources": [
+      {
+        "name": "postgres",
+        "postgres": {
+          "branch": "projects/yoshitaka-fraud-demo/branches/production",
+          "database": "projects/yoshitaka-fraud-demo/branches/production/databases/databricks-postgres",
+          "permission": "CAN_CONNECT_AND_CREATE"
+        }
+      }
+    ]
+  },
+  "deployment": {
+    "create_time": "2026-10-28T09:12:20Z",
+    "creator": "yoshitaka.kato@databricks.com",
+    "deployment_artifacts": {
+      "source_code_path": "/Workspace/Users/91f03d2b-a005-4ece-9827-ddbddd091f9d/src/01f1d2afae2b17ce9782359ac430bd37"
+    },
+    "deployment_id": "01f1d2afae2b17ce9782359ac430bd37",
+    "mode": "SNAPSHOT",
+    "scan_omitted_count_is_lower_bound": false,
+    "scan_omitted_findings_count": 0,
+    "scan_status": "APP_DEPLOYMENT_SCAN_STATUS_UNSPECIFIED",
+    "source_code_path": "/Workspace/Users/yoshitaka.kato@databricks.com/fraud-decision-demo/app",
+    "status": {
+      "message": "App started successfully",
+      "state": "SUCCEEDED"
+    },
+    "update_time": "2026-10-28T09:12:33Z"
+  },
+  "lakebase_grants": [
+    {
+      "sql": "GRANT USAGE, CREATE ON SCHEMA fraud_ops TO \"91f03d2b-a005-4ece-9827-ddbddd091f9d\"",
+      "ok": true,
+      "rows": []
+    },
+    {
+      "sql": "GRANT SELECT ON fraud_ops.fraud_alerts TO \"91f03d2b-a005-4ece-9827-ddbddd091f9d\"",
+      "ok": true,
+      "rows": []
+    },
+    {
+      "sql": "GRANT SELECT ON fraud_ops.action_memos TO \"91f03d2b-a005-4ece-9827-ddbddd091f9d\"",
+      "ok": true,
+      "rows": []
+    }
+  ],
+  "selfcheck": [
+    {
+      "sql": "SELECT checked_at, app_user, fraud_alerts_n, action_memos_n, pending_queue_n FROM fraud_ops.app_selfcheck ORDER BY checked_at DESC LIMIT 3",
+      "ok": true,
+      "rows": [
+        [
+          "2026-10-28 09:12:34.556763+00:00",
+          "91f03d2b-a005-4ece-9827-ddbddd091f9d",
+          "613",
+          "50",
+          "25"
+        ]
+      ]
+    },
+    {
+      "sql": "SELECT COUNT(*) FROM fraud_ops.review_decisions",
+      "ok": true,
+      "rows": [
+        [
+          "0"
+        ]
+      ]
+    }
+  ]
+}

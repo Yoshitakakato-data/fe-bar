@@ -4,7 +4,11 @@
 `scored_transactions` に対する SQL を生成して回答する。SHAP理由コード（モデルの「なぜ」）と
 役割分担し、Genie は **集計・傾向・セグメント探索の「なぜ全体でこうなっているか」** を担う。
 
-**ローカル等価物**: `src/genie_queries.py`（同じ質問文→SQL→実データ回答を実行し `outputs/genie_query_results.txt` に出力）。
+**実行済み**: `deploy/deploy.py --steps genie` が Genie Space を API（`POST /api/2.0/genie/spaces`）で作成し、
+下の6問＋フォローアップを `start-conversation` / `messages` で投げ、**Genie が生成した SQL と回答**を
+`../outputs/genie_live_transcript.md`（生データ: `../evidence/databricks/09_genie_conversations.json`）に保存している。
+
+参考（ローカル版）: `src/genie_queries.py` は同じ質問を人手の SQL で sqlite に投げるオフライン用の代替で、Genie ではない。
 
 ---
 
@@ -39,10 +43,11 @@
 
 ---
 
-## MCP / API から叩く（任意・自動テスト用）
-Databricks MCP の `ask_genie` で同じ質問を投げ、回答が返ることを確認できる。
-`outputs/genie_query_results.txt` に、同一SQLをローカルデータで実行した実結果をコミット済み。
+## 実会話の結果（抜粋）
+- Q3 海外 vs 国内のレビュー帯的中率: **44.0% vs 26.3%** → フォローアップ「高リスク国宛だけでは？」: **49.8%**
+- Q5 端末変更ありの不正率: **15.4倍**
+- Q4 深夜（0〜5時）の不正: 全体の **29.5%** で「偏っているとは言えない」（最多は22時）
+- Q6 PENDING のブロック候補: **156件・約1,910万円**
 
-## 証拠として見せるもの
-- 6問すべてに対する Genie の回答（表）。特に Q3「海外 precision 0.49 vs 国内 0.25」は
-  「海外送金にレビューを厚く」という運用示唆に直結する。
+Genie は列マスク・行フィルタ適用済みの `scored_transactions` を、質問したユーザの権限で読む
+（顧客IDはマスクされたまま回答に出る＝ガバナンスが自然言語の経路にも効いている）。

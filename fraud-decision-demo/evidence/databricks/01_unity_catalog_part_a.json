@@ -1,0 +1,65 @@
+[
+  {
+    "statement": "CREATE CATALOG IF NOT EXISTS serverless_stable_h87e9w_catalog\n  COMMENT '不正送金検知デモ（合成データ・PIIなし）'",
+    "state": "FAILED",
+    "error": "PERMISSION_DENIED: Principal 'Yoshitaka Kato' does not have CREATE CATALOG on Metastore 'metastore_aws_us_east_1'.",
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud\n  COMMENT 'Lakeflowが生成するbronze/silver/gold と スコア済みテーブル'",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "CREATE VOLUME IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud.raw\n  COMMENT '生データCSVの配置先（Lakeflowの入力）'",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_analysts`",
+    "state": "FAILED",
+    "error": "[RequestId=32cdcf0f-255c-4919-bf58-46e8884e2782 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.",
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fraud_analysts`",
+    "state": "FAILED",
+    "error": "[RequestId=3a0f6e5a-e3e6-416e-9eb6-d8de09ddc3f3 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.",
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_viewers`",
+    "state": "FAILED",
+    "error": "[RequestId=c8d388cc-4af2-48d1-adf4-fd0b071a7366 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.",
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fraud_viewers`",
+    "state": "FAILED",
+    "error": "[RequestId=3a7e883e-8736-44b4-a109-8047c6c54fa3 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.",
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.mask_customer(id STRING)\nRETURN CASE\n         WHEN is_account_group_member('fraud_analysts') OR is_member('fraud_analysts') THEN id\n         ELSE concat('C******', substr(id, -3))\n       END",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.segment_filter(is_foreign INT)\nRETURN is_foreign = 0\n    OR is_account_group_member('fraud_analysts_global')\n    OR is_member('fraud_analysts_global')",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  }
+]

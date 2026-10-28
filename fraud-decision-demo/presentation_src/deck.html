@@ -73,6 +73,7 @@ strong{color:var(--ink)}
 .cmp .now{color:var(--muted)}
 .cmp .new{color:var(--ink);font-weight:600}
 .cmp .win{color:var(--save);font-weight:600}
+.cmp.evid th:nth-child(2),.cmp.evid td:nth-child(2){text-align:left}
 
 /* journey */
 .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:36px}
@@ -164,7 +165,7 @@ footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);
 
 <!-- 1. HERO / THESIS -->
 <section class="slide hero">
-  <p class="eyebrow">金融サービス — 不正送金対策 / クラシックML × Databricks</p>
+  <p class="eyebrow">金融サービス（リテールバンキング） — 不正送金対策 / クラシックML × Databricks</p>
   <h1>属人的な不正判断を、<br>説明可能で標準化された運用へ。</h1>
   <p class="sub">不正検知スコアに「なぜ止めるべきか」という理由コードと期待金額価値を添え、
     アナリストの最終判断を一貫・高速・監査可能にする。データ取り込みからアプリ公開までを1つのプラットフォームで。</p>
@@ -228,7 +229,7 @@ footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);
   <h2 style="font-size:clamp(28px,4vw,44px)">生データからアプリ公開まで、1プラットフォームで。</h2>
   <div class="flow">
     <div class="step"><div class="n">01</div><div class="t">Lakeflow</div><div class="s">送金生データを bronze→silver→gold に宣言的に取り込み</div></div>
-    <div class="step"><div class="n">02</div><div class="t">Unity Catalog</div><div class="s">スキーマ・PIIマスク・権限・リネージを一元統制</div></div>
+    <div class="step"><div class="n">02</div><div class="t">Unity Catalog</div><div class="s">列マスク・行フィルタ・権限・リネージを一元統制</div></div>
     <div class="step"><div class="n">03</div><div class="t">クラシックML</div><div class="s">勾配ブースティング＋SHAPで理由コードを付与</div></div>
     <div class="step"><div class="n">04</div><div class="t">Lakebase</div><div class="s">スコアと理由を低遅延Postgresへ同期し運用化</div></div>
     <div class="step"><div class="n">05</div><div class="t">Genie</div><div class="s">全体傾向を日本語で探索し運用改善へ</div></div>
@@ -236,6 +237,7 @@ footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);
   </div>
   <p style="margin-top:28px" class="lead"><strong>解釈性</strong>はML（個票の「なぜ止めるか」）、<strong>探索</strong>はGenie（全体の「なぜこの傾向か」）と
     役割を分け、両輪で属人化を解消する。</p>
+  <p class="mini">6コンポーネントすべてを Databricks 実ワークスペース（FEVM・サーバレス）で実行済み。証跡は 06 と <span class="num">evidence/databricks/</span>。</p>
 </section>
 
 <!-- 5. COCKPIT / INTERPRETABILITY -->
@@ -257,56 +259,80 @@ footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);
         <div style="margin-top:6px" class="formula">= 0.923 × 119,536 − 0.077 × 3,200</div></div>
       <div><div class="res num">+110,078円</div><div class="formula">→ 🔴 ブロック推奨</div></div>
     </div>
-    <p class="callout">加法的分解は厳密（<span class="num">baseline + Σ寄与 = logit</span>、検算誤差 ~1e-15）。
+    <p class="callout">加法的分解は厳密（<span class="num">baseline + Σ寄与 = logit</span>、Databricks 実行で全18,000件の最大誤差 <span class="num">1.5e-11</span>）。
       「なぜ止めたか」を機械的に説明でき、規制・監査に耐える。</p>
+    <p class="mini" style="margin-top:12px"><strong>対応メモ（GenAI）</strong>：理由コードとEVだけを根拠に <span class="num">ai_query</span> が3文に整形 —
+      「EVが正のためブロックを推奨。主な理由は送金額が平常時の平均を大きく上回る点、海外への送金、高リスク国宛…顧客には高額となった理由を確認」。判断そのものは ML＋EV が担う。</p>
   </div>
   <p class="mini">誤検知の見極めも同じ画面で: 例）正当な高額海外送金はスコアが高くても理由コードとEVで解放判断でき、無用な摩擦を避けられる。</p>
 </section>
 
 <!-- 6. GENIE INSIGHT -->
 <section class="slide">
-  <p class="eyebrow">05 — Genie による全体探索（自然言語）</p>
+  <p class="eyebrow">05 — Genie による全体探索（Databricks 上の実会話）</p>
   <h2 style="font-size:clamp(28px,4vw,44px)">「海外と国内で的中率は？」— 日本語の質問が運用改善になる。</h2>
   <div class="two">
-    <div class="col"><div class="role">Genieへの質問</div>
+    <div class="col"><div class="role">Genieとの会話（SQL は Genie が生成）</div>
       <h3>海外送金と国内で、レビュー帯の的中率を比較して</h3>
       <ul>
-        <li>海外セグメント： 的中率 <strong class="num accent">0.49</strong>（レビュー272件）</li>
-        <li>国内セグメント： 的中率 <strong class="num">0.25</strong>（レビュー225件）</li>
+        <li>海外送金： 的中率 <strong class="num accent">44.0%</strong>（377件）</li>
+        <li>国内： 的中率 <strong class="num">26.3%</strong>（236件）</li>
       </ul>
-      <p style="margin-top:14px">→ <strong>海外送金にレビュー資源を厚く</strong>配分すべき、という運用示唆が即座に得られる。</p>
+      <h3 style="margin-top:14px;font-size:18px">↳ 高リスク国宛だけに絞ると？</h3>
+      <ul><li>的中率 <strong class="num accent">49.8%</strong>（263件）— ほぼ2件に1件が実不正</li></ul>
+      <p style="margin-top:10px">→ <strong>高リスク国宛の海外送金を優先キュー化</strong>し、レビュー資源を厚く配分。</p>
     </div>
-    <div class="col"><div class="role">同時に答えられる問い</div>
+    <div class="col"><div class="role">同じ Genie Space での他の回答</div>
       <h3>現場が毎日聞きたいこと</h3>
       <ul>
-        <li>判定ポリシー別の件数・平均スコア・合計金額は？</li>
-        <li>深夜に不正は偏る？（→ 深夜帯が最多）</li>
-        <li>端末変更ありは不正率が何倍高い？</li>
-        <li>未判定のブロック候補は何件、いくら止められる？</li>
+        <li>端末変更ありの不正率は？ → なしの <strong class="num">15.4倍</strong></li>
+        <li>深夜に不正は偏る？ → 0〜5時は全体の <strong class="num">29.5%</strong>、<strong>偏りは限定的</strong>（最多は22時）。「深夜だから怪しい」という勘を見直す根拠に</li>
+        <li>未判定のブロック候補は？ → <strong class="num">156件・約1,910万円</strong></li>
+        <li>顧客IDは UC の列マスクで <span class="num">C******000</span> のまま回答 — ガバナンスは自然言語の経路にも効く</li>
       </ul>
     </div>
   </div>
+  <p class="mini">出典: <span class="num">outputs/genie_live_transcript.md</span>（FEVM ワークスペースで 6問＋フォローアップを実行、2026-10-28）。</p>
+</section>
+
+<!-- 6b. EVIDENCE -->
+<section class="slide">
+  <p class="eyebrow">06 — 動くことの証明：Databricks 実ワークスペースでの実行結果</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">設計図ではなく、実際に動いたデータジャーニー。</h2>
+  <table class="cmp evid">
+    <thead><tr><th>コンポーネント</th><th>実行したこと</th><th>結果</th></tr></thead>
+    <tbody>
+      <tr><td>Lakeflow</td><td class="now">サーバレス宣言的パイプライン bronze→silver→gold</td><td class="new num">各60,000行・期待値違反 0</td></tr>
+      <tr><td>Unity Catalog</td><td class="now">列マスク（顧客ID）＋行フィルタ（海外送金は海外チームのみ）</td><td class="new num">海外 0行 → 所属後 2,034行</td></tr>
+      <tr><td>クラシックML</td><td class="now">GBDT＋SHAP、MLflow→UC モデル登録</td><td class="new num">AUC 0.903・加法性誤差 1.5e-11</td></tr>
+      <tr><td>Lakebase</td><td class="now">Autoscaling Postgres へ synced table（判断が必要な取引）</td><td class="new num">Postgres 613行 = Delta 613行</td></tr>
+      <tr><td>Databricks Apps</td><td class="now">コックピットをデプロイ、起動時に Lakebase 読取・書込を自己チェック</td><td class="new num">RUNNING・キュー25件表示</td></tr>
+      <tr><td>Genie</td><td class="now">Genie Space を作成し日本語6問＋フォローアップ</td><td class="new num">7ターンすべて回答</td></tr>
+    </tbody>
+  </table>
+  <p class="mini">API 応答と実行ログは <span class="num">evidence/databricks/</span> にそのまま保存。デプロイは <span class="num">databricks/deploy/deploy.py</span> 1本で再現できる。</p>
 </section>
 
 <!-- 7. VALUE / NEXT -->
 <section class="slide">
-  <p class="eyebrow">06 — 誰にとっての価値か</p>
-  <h2 style="font-size:clamp(28px,4vw,44px)">スポンサーとドメインオーナー、双方の言葉で。</h2>
+  <p class="eyebrow">07 — 誰にとっての価値か</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">CRO と不正対策部長、それぞれのスコアカードで。</h2>
   <div class="two">
-    <div class="col"><div class="role">エグゼクティブ・スポンサー</div>
-      <h3>P&L と規制対応</h3>
+    <div class="col"><div class="role">エグゼクティブ・スポンサー｜CRO（最高リスク責任者）</div>
+      <h3>不正損失・顧客摩擦・監査指摘</h3>
       <ul>
-        <li><strong>年 +1.0億円</strong>のネット改善と <strong>2.3億円</strong>の摩擦コスト削減</li>
-        <li>すべての判断が<strong>説明可能・監査可能</strong>（規制対応リスクの低減）</li>
-        <li>単一プラットフォームで <strong>TCOと運用の分断を削減</strong></li>
+        <li><strong>不正関連のネット損益</strong>：年 <strong>+1.0億円</strong></li>
+        <li><strong>顧客摩擦コスト</strong>：誤検知 −7.3万件/年で <strong>−2.3億円</strong></li>
+        <li><strong>規制・内部監査の指摘リスク</strong>：全判断に理由コード（厳密な加法分解）、UC のリネージ・アクセス制御で説明責任を担保</li>
       </ul>
     </div>
-    <div class="col"><div class="role">ドメインオーナー（不正調査部門）</div>
-      <h3>現場の意思決定</h3>
+    <div class="col"><div class="role">ドメインオーナー｜不正対策部長（Head of Fraud Operations）</div>
+      <h3>処理件数・処理時間・判断のばらつき</h3>
       <ul>
-        <li>レビュー件数 <strong>−91%</strong>、1件あたり <strong>14→5分</strong></li>
-        <li>スコアの裏に<strong>理由コードとEV</strong>があり、判断が標準化・高速化</li>
-        <li>Genieで<strong>自分でデータに問える</strong>（データ部門待ちが不要）</li>
+        <li><strong>アラート処理件数</strong>：レビュー <strong>−91%</strong>（5,719→497件）</li>
+        <li><strong>1件あたり処理時間</strong>：<strong>14→5分</strong>（理由コード＋EV＋対応メモ）</li>
+        <li><strong>判断のばらつき</strong>：標準化率 <strong>97.7%</strong>、残りも同じ根拠で判断</li>
+        <li><strong>自部門で分析</strong>：Genie で「どこにレビューを厚く」をその場で判断</li>
       </ul>
     </div>
   </div>
@@ -315,8 +341,8 @@ footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);
 </section>
 
 <footer>
-  不正送金レビュー支援 — エンドツーエンド・データジャーニー（金融 / クラシックML）。
-  数値はすべて合成データに基づく試算で、前提は <span class="num">src/common.py</span> に一元化。実顧客データ・PIIは不使用。
+  不正送金レビュー支援 — エンドツーエンド・データジャーニー（金融・リテールバンキング / クラシックML）。
+  数値はすべて合成データに基づく試算で、前提は <span class="num">src/common.py</span> に一元化。実顧客データ・PIIは不使用。年換算KPIはローカル版ホールドアウト、Databricks 実行結果は <span class="num">evidence/databricks/</span>。
 </footer>
 
 </body>

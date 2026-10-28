@@ -4,7 +4,23 @@ Lakehouse の `scored_transactions`（Delta）を **Lakebase の synced table** 
 低遅延 Postgres に同期し、Databricks App がミリ秒級で読み書きできる運用ストアにする。
 これにより「夜間バッチ抽出」をやめ、アナリストがライブに判断→記録できる。
 
+**実行済み（Lakebase Autoscaling）**: `deploy/deploy.py --steps lakebase,app` が FEVM の Lakebase Autoscaling
+プロジェクト（Postgres 17）に対して以下を自動実行した。証跡は `../evidence/databricks/07_lakebase_sync.json`, `08_databricks_app.json`。
+
+| 項目 | 実際の構成 |
+|---|---|
+| 同期元 | `<catalog>.fraud.scored_transactions_ops`（REVIEW / BLOCK_CANDIDATE の 613件、CDF有効） |
+| 同期先 | synced table `<catalog>.fraud_ops.fraud_alerts`（Postgres 側 `fraud_ops.fraud_alerts`）、TRIGGERED |
+| 対応メモ | `<catalog>.fraud.action_memos` → `fraud_ops.action_memos` |
+| App 接続 | App に postgres リソース（branch/database, CAN_CONNECT_AND_CREATE）を付与、SP の OAuth 資格情報で接続 |
+| 判断の書き戻し | `fraud_ops.review_decisions`（App が作成・upsert）、起動時自己チェックは `fraud_ops.app_selfcheck` |
+
+同期元を絞った理由: アナリスト向けの `scored_transactions` には列マスク・行フィルタを掛ける一方、
+運用ストアは「判断が必要な取引」だけを小さく持てばよいため。
+
 **ローカル等価物**: `src/load_lakebase.py`（sqlite で同じ `fraud_alerts` スキーマを作成し、App が読み書き）。
+
+以下は Lakebase Provisioned（インスタンス型）で手動構築する場合の参考手順。
 
 ---
 

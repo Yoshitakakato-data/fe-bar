@@ -1,0 +1,13 @@
+{
+  "warehouse_id": "24921abf4af4226b",
+  "warehouse_name": "Serverless Starter Warehouse",
+  "catalog": "serverless_stable_h87e9w_catalog",
+  "user": "yoshitaka.kato@databricks.com",
+  "lakebase_instance": "yoshitaka-kato-fraud-ops",
+  "app_name": "yoshitaka-kato-fraud-review",
+  "db_catalog": "yoshitaka_kato_fraud_ops",
+  "pipeline_id": "afe260e0-ca34-4d58-8fa1-8b04faccde4a",
+  "lakebase_project": "yoshitaka-fraud-demo",
+  "genie_space_id": "01f1d2afeea5141fbac4c8debfbe8cd7",
+  "host": "https://fevm-serverless-stable-h87e9w.cloud.databricks.com"
+}

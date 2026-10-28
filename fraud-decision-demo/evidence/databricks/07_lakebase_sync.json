@@ -1,0 +1,130 @@
+{
+  "project": {
+    "create_time": "2026-10-28T08:52:44Z",
+    "name": "projects/yoshitaka-fraud-demo",
+    "project_id": "yoshitaka-fraud-demo",
+    "status": {
+      "branch_logical_size_limit_bytes": 35184372088832,
+      "default_branch": "projects/yoshitaka-fraud-demo/branches/production",
+      "default_endpoint_settings": {
+        "autoscaling_limit_max_cu": 2,
+        "autoscaling_limit_min_cu": 0.5,
+        "suspend_timeout_duration": "300s"
+      },
+      "display_name": "yoshitaka-fraud-demo",
+      "enable_pg_native_login": false,
+      "history_retention_duration": "604800s",
+      "owner": "aec5be3d-de3c-404c-8e60-feed0f265fd3",
+      "pg_version": 17,
+      "project_id": "yoshitaka-fraud-demo",
+      "synthetic_storage_size_bytes": 0
+    },
+    "uid": "c60eb6f5-dcb4-448b-b975-5e766639697d",
+    "update_time": "2026-10-28T08:52:46Z"
+  },
+  "endpoint": {
+    "name": "projects/yoshitaka-fraud-demo/branches/production/endpoints/primary",
+    "status": {
+      "autoscaling_limit_max_cu": 2,
+      "autoscaling_limit_min_cu": 0.5,
+      "current_state": "ACTIVE",
+      "disabled": false,
+      "endpoint_id": "primary",
+      "endpoint_type": "ENDPOINT_TYPE_READ_WRITE",
+      "group": {
+        "enable_readable_secondaries": false,
+        "max": 1,
+        "min": 1
+      },
+      "hosts": {
+        "host": "ep-blue-truth-d2zi97qb.database.us-east-1.cloud.databricks.com",
+        "read_write_pooled_host": "ep-blue-truth-d2zi97qb-pooler.database.us-east-1.cloud.databricks.com"
+      },
+      "last_active_time": "2000-01-01T00:00:00Z",
+      "settings": {},
+      "suspend_timeout_duration": "300s"
+    }
+  },
+  "database_catalog": [
+    {
+      "statement": "CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud_ops COMMENT 'Lakebase 同期テーブル（Postgres 側も同名スキーマ）'",
+      "state": "SUCCEEDED",
+      "error": null,
+      "columns": [],
+      "rows": []
+    }
+  ],
+  "synced_tables": {
+    "fraud_alerts": {
+      "name": "synced_tables/serverless_stable_h87e9w_catalog.fraud_ops.fraud_alerts",
+      "status": {
+        "detailed_state": "SYNCED_TABLE_PROVISIONING_PIPELINE_RESOURCES",
+        "message": "Synced table is currently pending setup of pipeline resources. Check latest status in Delta Live Tables: https://fevm-serverless-stable-h87e9w.cloud.databricks.com#joblist/pipelines/ab70795c-0242-4f81-83fc-5ea7cc3ce73f/updates/affe74aa-9a84-4eae-bf66-8aff1e4cf145",
+        "ongoing_sync_progress": {},
+        "pipeline_id": "ab70795c-0242-4f81-83fc-5ea7cc3ce73f",
+        "project": "projects/yoshitaka-fraud-demo",
+        "unity_catalog_provisioning_state": "ACTIVE"
+      },
+      "synced_table_id": "serverless_stable_h87e9w_catalog.fraud_ops.fraud_alerts",
+      "uid": "50971dc3-9269-4347-8ec6-1a08b5464dc8"
+    },
+    "action_memos": {
+      "name": "synced_tables/serverless_stable_h87e9w_catalog.fraud_ops.action_memos",
+      "status": {
+        "detailed_state": "SYNCED_TABLE_PROVISIONING_PIPELINE_RESOURCES",
+        "message": "Synced table is currently pending setup of pipeline resources. Check latest status in Delta Live Tables: https://fevm-serverless-stable-h87e9w.cloud.databricks.com#joblist/pipelines/cfb0c800-6ec5-4c84-9eb5-c6067271b5bf/updates/94378c69-13cc-40a6-9228-4646fc27ba4e",
+        "ongoing_sync_progress": {},
+        "pipeline_id": "cfb0c800-6ec5-4c84-9eb5-c6067271b5bf",
+        "project": "projects/yoshitaka-fraud-demo",
+        "unity_catalog_provisioning_state": "ACTIVE"
+      },
+      "synced_table_id": "serverless_stable_h87e9w_catalog.fraud_ops.action_memos",
+      "uid": "0b881387-164d-44e6-ab31-c5b337c84d6b"
+    }
+  },
+  "postgres_checks": [
+    {
+      "sql": "SELECT COUNT(*) FROM fraud_ops.fraud_alerts",
+      "ok": true,
+      "rows": [
+        [
+          "613"
+        ]
+      ]
+    },
+    {
+      "sql": "SELECT decision_policy, COUNT(*) FROM fraud_ops.fraud_alerts GROUP BY 1 ORDER BY 1",
+      "ok": true,
+      "rows": [
+        [
+          "BLOCK_CANDIDATE",
+          "156"
+        ],
+        [
+          "REVIEW",
+          "457"
+        ]
+      ]
+    },
+    {
+      "sql": "SELECT COUNT(*) FROM fraud_ops.action_memos",
+      "ok": false,
+      "error": "relation \"fraud_ops.action_memos\" does not exist\nLINE 1: SELECT COUNT(*) FROM fraud_ops.action_memos\n                             ^"
+    }
+  ],
+  "delta_count": [
+    {
+      "statement": "SELECT COUNT(*) FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions_ops",
+      "state": "SUCCEEDED",
+      "error": null,
+      "columns": [
+        "count(1)"
+      ],
+      "rows": [
+        [
+          "613"
+        ]
+      ]
+    }
+  ]
+}

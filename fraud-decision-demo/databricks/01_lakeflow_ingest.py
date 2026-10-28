@@ -15,11 +15,14 @@
 import dlt
 from pyspark.sql import functions as F
 
-RAW_PATH = "/Volumes/fraud_demo/fraud/raw/raw_transactions.csv"  # Unity Catalog Volume に配置
+# パイプライン設定 fraud.raw_path で上書き可（deploy/deploy.py がカタログ名に合わせて設定）
+RAW_PATH = spark.conf.get("fraud.raw_path", "/Volumes/fraud_demo/fraud/raw/raw_transactions.csv")
 HIGH_RISK = ["XA", "XB", "XC"]
 
 # COMMAND ----------
 # MAGIC %md ## bronze — 生データをそのまま取り込み（型付けのみ）
+
+# COMMAND ----------
 
 @dlt.table(comment="送金トランザクション生データ（合成・PIIなし）")
 def bronze_transactions():
@@ -30,6 +33,8 @@ def bronze_transactions():
 # COMMAND ----------
 # MAGIC %md ## silver — クレンジング＋期待値(データ品質)チェック
 
+# COMMAND ----------
+
 @dlt.table(comment="クレンジング済み送金取引")
 @dlt.expect_or_drop("valid_amount", "amount > 0")
 @dlt.expect_or_drop("valid_avg", "customer_avg_amount_30d > 0")
@@ -39,6 +44,8 @@ def silver_transactions():
 
 # COMMAND ----------
 # MAGIC %md ## gold — 派生特徴量テーブル（MLと運用サービングの単一ソース）
+
+# COMMAND ----------
 
 @dlt.table(comment="不正検知の特徴量テーブル（ML学習＋Lakebase同期の元）")
 def gold_features():

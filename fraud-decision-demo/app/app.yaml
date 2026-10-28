@@ -1,11 +1,7 @@
-command: ["gunicorn", "app:app", "--bind", "0.0.0.0:8080", "--workers", "2"]
+command: ["gunicorn", "app:app", "--bind", "0.0.0.0:8080", "--workers", "1"]
 
+# Lakebase 接続情報(PGHOST/PGDATABASE/PGUSER/PGPORT)は App の postgres リソースから自動注入。
+# パスワードは App のサービスプリンシパルの OAuth 資格情報を databricks-sdk で発行する（app.py）。
 env:
-  - name: PGHOST
-    valueFrom: lakebase-fraud-ops-host      # Lakebase接続情報（Appのリソース/シークレットで注入）
-  - name: PGDATABASE
-    value: databricks_postgres
-  - name: PGUSER
-    valueFrom: lakebase-fraud-ops-user
-  - name: PGPASSWORD
-    valueFrom: lakebase-fraud-ops-token      # OAuthトークン
+  - name: LAKEBASE_ENDPOINT
+    value: __LAKEBASE_ENDPOINT__

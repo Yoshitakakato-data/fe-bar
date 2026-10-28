@@ -1,0 +1,44 @@
+{
+  "run_page_url": "https://fevm-serverless-stable-h87e9w.cloud.databricks.com/?o=7474659820190227#job/1070254333453881/run/1044881607833499",
+  "notebook_result": {
+    "mlflow_run_id": "14e4675955ac4a6eb431d2e983a8496f",
+    "registered_model": "serverless_stable_h87e9w_catalog.fraud.fraud_gbdt",
+    "model_version": "1",
+    "train_rows": 42000,
+    "test_rows": 18000,
+    "test_fraud_rate": 0.022,
+    "roc_auc": 0.9034,
+    "precision@0.6": 0.7756,
+    "recall@0.6": 0.3056,
+    "shap_additivity_max_abs_err": 1.4551915228366852e-11,
+    "policy_counts": {
+      "BLOCK_CANDIDATE": 156,
+      "REVIEW": 457,
+      "AUTO_APPROVE": 17387
+    },
+    "top_example": {
+      "txn_id": "T0012314",
+      "fraud_score": 1.0,
+      "reason_codes": [
+        {
+          "feature": "amount_log",
+          "label": "送金額が高額",
+          "contribution": 23.9376,
+          "value": 4.2389
+        },
+        {
+          "feature": "sec_since_last_txn",
+          "label": "直前取引からの間隔が異常",
+          "contribution": 16.0748,
+          "value": 6.7564
+        },
+        {
+          "feature": "amount_to_avg_ratio",
+          "label": "送金額が平常時の平均を大きく上回る",
+          "contribution": 3.248,
+          "value": 0.7676
+        }
+      ]
+    }
+  }
+}

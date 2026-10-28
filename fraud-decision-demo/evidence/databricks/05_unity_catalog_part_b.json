@@ -1,0 +1,276 @@
+[
+  {
+    "statement": "ALTER TABLE serverless_stable_h87e9w_catalog.fraud.scored_transactions\n  ALTER COLUMN customer_id SET MASK serverless_stable_h87e9w_catalog.fraud.mask_customer",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "ALTER TABLE serverless_stable_h87e9w_catalog.fraud.scored_transactions\n  SET ROW FILTER serverless_stable_h87e9w_catalog.fraud.segment_filter ON (is_foreign)",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [],
+    "rows": []
+  },
+  {
+    "statement": "SELECT source_table_full_name, target_table_full_name, entity_type, event_time\nFROM system.access.table_lineage\nWHERE target_table_catalog = 'serverless_stable_h87e9w_catalog'\nORDER BY event_time DESC LIMIT 20",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [
+      "source_table_full_name",
+      "target_table_full_name",
+      "entity_type",
+      "event_time"
+    ],
+    "rows": []
+  },
+  {
+    "governance_probe": {
+      "before_join_fraud_analysts_global": [
+        {
+          "statement": "SELECT is_member('fraud_analysts_global') AS in_global, is_member('fraud_analysts') AS in_analysts, SUM(CASE WHEN is_foreign=1 THEN 1 ELSE 0 END) AS foreign_rows_visible, SUM(CASE WHEN is_foreign=0 THEN 1 ELSE 0 END) AS domestic_rows_visible, MIN(customer_id) AS sample_customer_id FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions",
+          "state": "SUCCEEDED",
+          "error": null,
+          "columns": [
+            "in_global",
+            "in_analysts",
+            "foreign_rows_visible",
+            "domestic_rows_visible",
+            "sample_customer_id"
+          ],
+          "rows": [
+            [
+              "false",
+              "false",
+              "0",
+              "15966",
+              "C******000"
+            ]
+          ]
+        }
+      ],
+      "after_join_fraud_analysts_global": [
+        {
+          "statement": "SELECT is_member('fraud_analysts_global') AS in_global, is_member('fraud_analysts') AS in_analysts, SUM(CASE WHEN is_foreign=1 THEN 1 ELSE 0 END) AS foreign_rows_visible, SUM(CASE WHEN is_foreign=0 THEN 1 ELSE 0 END) AS domestic_rows_visible, MIN(customer_id) AS sample_customer_id FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions",
+          "state": "SUCCEEDED",
+          "error": null,
+          "columns": [
+            "in_global",
+            "in_analysts",
+            "foreign_rows_visible",
+            "domestic_rows_visible",
+            "sample_customer_id"
+          ],
+          "rows": [
+            [
+              "true",
+              "false",
+              "2034",
+              "15966",
+              "C******000"
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "statement": "DESCRIBE TABLE EXTENDED serverless_stable_h87e9w_catalog.fraud.scored_transactions",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [
+      "col_name",
+      "data_type",
+      "comment"
+    ],
+    "rows": [
+      [
+        "txn_id",
+        "string",
+        null
+      ],
+      [
+        "customer_id",
+        "string",
+        null
+      ],
+      [
+        "event_ts",
+        "int",
+        null
+      ],
+      [
+        "hour_of_day",
+        "int",
+        null
+      ],
+      [
+        "amount",
+        "double",
+        null
+      ],
+      [
+        "payee_country",
+        "string",
+        null
+      ],
+      [
+        "channel",
+        "string",
+        null
+      ],
+      [
+        "amount_to_avg_ratio",
+        "double",
+        null
+      ],
+      [
+        "amount_log",
+        "double",
+        null
+      ],
+      [
+        "is_new_payee",
+        "int",
+        null
+      ],
+      [
+        "is_foreign",
+        "int",
+        null
+      ],
+      [
+        "is_high_risk_country",
+        "int",
+        null
+      ],
+      [
+        "hour_risk",
+        "double",
+        null
+      ],
+      [
+        "num_txn_24h",
+        "int",
+        null
+      ],
+      [
+        "device_change",
+        "int",
+        null
+      ],
+      [
+        "account_age_days",
+        "int",
+        null
+      ],
+      [
+        "sec_since_last_txn",
+        "double",
+        null
+      ],
+      [
+        "is_fraud",
+        "int",
+        null
+      ],
+      [
+        "fraud_score",
+        "double",
+        null
+      ],
+      [
+        "decision_policy",
+        "string",
+        null
+      ]
+    ]
+  },
+  {
+    "statement": "SHOW GRANTS ON SCHEMA serverless_stable_h87e9w_catalog.fraud",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [
+      "Principal",
+      "ActionType",
+      "ObjectType",
+      "ObjectKey"
+    ],
+    "rows": [
+      [
+        "yoshitaka.kato@databricks.com",
+        "ALL PRIVILEGES",
+        "CATALOG",
+        "serverless_stable_h87e9w_catalog"
+      ],
+      [
+        "yoshitaka.kato@databricks.com",
+        "MANAGE",
+        "CATALOG",
+        "serverless_stable_h87e9w_catalog"
+      ],
+      [
+        "account users",
+        "READ METADATA",
+        "METASTORE",
+        "metastore_aws_us_east_1"
+      ],
+      [
+        "aec5be3d-de3c-404c-8e60-feed0f265fd3",
+        "ALL PRIVILEGES",
+        "CATALOG",
+        "serverless_stable_h87e9w_catalog"
+      ],
+      [
+        "aec5be3d-de3c-404c-8e60-feed0f265fd3",
+        "MANAGE",
+        "CATALOG",
+        "serverless_stable_h87e9w_catalog"
+      ],
+      [
+        "suraj.bang@databricks.com",
+        "READ METADATA",
+        "METASTORE",
+        "metastore_aws_us_east_1"
+      ]
+    ]
+  },
+  {
+    "statement": "SELECT customer_id, is_foreign, fraud_score FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions\n          ORDER BY fraud_score DESC LIMIT 5",
+    "state": "SUCCEEDED",
+    "error": null,
+    "columns": [
+      "customer_id",
+      "is_foreign",
+      "fraud_score"
+    ],
+    "rows": [
+      [
+        "C******288",
+        "0",
+        "0.999999999999998"
+      ],
+      [
+        "C******848",
+        "1",
+        "0.9999999666994257"
+      ],
+      [
+        "C******809",
+        "0",
+        "0.9999995249948954"
+      ],
+      [
+        "C******670",
+        "0",
+        "0.9999346475975013"
+      ],
+      [
+        "C******658",
+        "0",
+        "0.9999060345729661"
+      ]
+    ]
+  }
+]

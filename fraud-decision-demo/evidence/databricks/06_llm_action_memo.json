@@ -1,0 +1,58 @@
+{
+  "endpoint": "databricks-claude-sonnet-5",
+  "results": [
+    {
+      "statement": "CREATE OR REPLACE TABLE serverless_stable_h87e9w_catalog.fraud.action_memos\n  COMMENT 'ブロック候補・レビュー上位取引の対応メモ（ai_query で生成、入力は理由コードとEVのみ）'\n  TBLPROPERTIES (delta.enableChangeDataFeed = true)\nAS\nWITH top AS (\n  SELECT txn_id, amount, payee_country, fraud_score, decision_policy, reason_codes,\n         ROUND(fraud_score * amount - (1 - fraud_score) * 3200, 0) AS ev_block_jpy\n  FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions\n  WHERE decision_policy IN ('BLOCK_CANDIDATE', 'REVIEW')\n  ORDER BY fraud_score DESC\n  LIMIT 50\n)\nSELECT txn_id, fraud_score, ev_block_jpy,\n       ai_query(\n         'databricks-claude-sonnet-5',\n         concat(\n           'あなたは銀行の不正送金調査アナリストを支援するアシスタントです。',\n           '以下の取引データだけを根拠に、日本語で3文以内の対応メモを書いてください。',\n           '1文目: 推奨アクション（EVが正ならブロック、負なら承認寄り）。',\n           '2文目: 主な理由（理由コードの label を使い、寄与の大きい順）。',\n           '3文目: 顧客への確認事項を1つ。データにない事実を推測で足さないこと。',\n           '\\n取引ID: ', txn_id,\n           '\\n送金額(円): ', CAST(ROUND(amount, 0) AS STRING),\n           '\\n宛先国: ', payee_country,\n           '\\n不正スコア: ', CAST(ROUND(fraud_score, 3) AS STRING),\n           '\\n判定ポリシー: ', decision_policy,\n           '\\nブロック期待価値EV(円): ', CAST(ev_block_jpy AS STRING),\n           '\\n理由コード(SHAP寄与, JSON): ', reason_codes)\n       ) AS memo,\n       'databricks-claude-sonnet-5' AS model_endpoint,\n       current_timestamp() AS generated_at\nFROM top",
+      "state": "SUCCEEDED",
+      "error": null,
+      "columns": [
+        "num_affected_rows",
+        "num_inserted_rows"
+      ],
+      "rows": []
+    },
+    {
+      "statement": "SELECT txn_id, ROUND(fraud_score, 3) AS fraud_score, ev_block_jpy, memo\nFROM serverless_stable_h87e9w_catalog.fraud.action_memos\nORDER BY fraud_score DESC\nLIMIT 5",
+      "state": "SUCCEEDED",
+      "error": null,
+      "columns": [
+        "txn_id",
+        "fraud_score",
+        "ev_block_jpy",
+        "memo"
+      ],
+      "rows": [
+        [
+          "T0017126",
+          "1.0",
+          "54331.0",
+          "対応メモ:本取引はブロック期待価値EVが54,331円と正であり、ブロックを推奨します。主な理由は、直前取引からの間隔が異常であること、送金額が高額であること、送金額が平常時の平均を大きく上回ることです。顧客には、直前の取引から今回の送金までの間隔が通常と異なる点について、取引の経緯を確認してください。"
+        ],
+        [
+          "T0022748",
+          "1.0",
+          "47178.0",
+          "対応メモ:本取引はEV47,178円(正)のためブロックを推奨します。主な理由は、送金額が平常時の平均を大きく上回る点が最も寄与度が高く、次いで海外への送金、高リスク国宛の送金が確認されています。顧客には、今回の送金が通常より高額となっている理由についてご確認ください。"
+        ],
+        [
+          "T0012314",
+          "1.0",
+          "17331.0",
+          "取引T0012314はEVが正(17,331円)のため、ブロックを推奨します。主な理由は「送金額が高額」「直前取引からの間隔が異常」「送金額が平常時の平均を大きく上回る」の順で不正リスクに寄与しています。顧客には直前の取引からの時間間隔が通常と異なる点について、本人による操作か確認が必要です。"
+        ],
+        [
+          "T0031534",
+          "1.0",
+          "37494.0",
+          "対応メモ:\n\n1. EVが正(37,494円)であるため、本取引はブロックを推奨します。\n\n2. 主な理由は、送金額が平常時の平均を大きく上回る点が最大の寄与要因であり、次いで短時間に取引が集中している点、口座開設からの経過期間が短い点が挙げられます。\n\n3. 顧客へは、今回の送金額が通常の利用パターンと大きく異なる理由についてご確認ください。"
+        ],
+        [
+          "T0037427",
+          "1.0",
+          "45448.0",
+          "取引T0037427はブロック期待価値EVが45,448円と正の値であり、ブロックを推奨します。主な理由は、直前取引からの間隔が異常であること、送金額が高額であること、送金額が平常時の平均を大きく上回ることの順に寄与しています。顧客には、直前の取引間隔が通常と異なる点について、本人による意図した操作かどうかを確認してください。"
+        ]
+      ]
+    }
+  ]
+}

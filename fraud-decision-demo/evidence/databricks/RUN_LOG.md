@@ -1,0 +1,87 @@
+- `2026-10-28 17:54:46` CREATE CATALOG 権限なし → 既定カタログ `serverless_stable_h87e9w_catalog` を使用
+- `2026-10-28 17:54:48` **step uc_a** 開始
+- `2026-10-28 17:54:49` SQL `CREATE CATALOG IF NOT EXISTS serverless_stable_h87e9w_catalog` → FAILED (PERMISSION_DENIED: Principal 'Yoshitaka Kato' does not have CREATE CATALOG on Metastore 'metastore_aws_us_east_1'.)
+- `2026-10-28 17:54:52` SQL `CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud` → SUCCEEDED
+- `2026-10-28 17:54:54` SQL `CREATE VOLUME IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud.raw` → SUCCEEDED
+- `2026-10-28 17:54:55` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_analysts` → FAILED ([RequestId=c3d7861b-a565-4452-9789-97e330fed975 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:54:57` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=19b9e032-a96b-4683-86c0-6b24403ab75a ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:54:58` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_viewers`` → FAILED ([RequestId=79182694-73ab-44d7-911e-a58fa7c6415c ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:55:00` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=aa5df450-7c71-4e1b-833a-e26d51fcb115 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:55:02` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.mask_customer(` → SUCCEEDED
+- `2026-10-28 17:55:04` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.segment_filter` → SUCCEEDED
+- `2026-10-28 17:55:04` **step upload** 開始
+- `2026-10-28 17:55:10` Volume へ生データをアップロード: dbfs:/Volumes/serverless_stable_h87e9w_catalog/fraud/raw/raw_transactions.csv
+- `2026-10-28 17:55:10` **step pipeline** 開始
+- `2026-10-28 17:55:17` Lakeflow パイプライン afe260e0-ca34-4d58-8fa1-8b04faccde4a 更新開始 update=7c256214-2809-4644-87f9-a202f05f4515
+- `2026-10-28 17:57:03` **step uc_a** 開始
+- `2026-10-28 17:57:05` SQL `CREATE CATALOG IF NOT EXISTS serverless_stable_h87e9w_catalog` → FAILED (PERMISSION_DENIED: Principal 'Yoshitaka Kato' does not have CREATE CATALOG on Metastore 'metastore_aws_us_east_1'.)
+- `2026-10-28 17:57:07` SQL `CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud` → SUCCEEDED
+- `2026-10-28 17:57:08` SQL `CREATE VOLUME IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud.raw` → SUCCEEDED
+- `2026-10-28 17:57:10` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_analysts` → FAILED ([RequestId=45cda988-0328-43ca-937b-6464a01c3f9d ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:57:11` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=d776462a-4b35-4535-aff4-f6816d8aae65 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:57:12` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_viewers`` → FAILED ([RequestId=f345d33a-6c8c-4489-94d6-6c1ec8efe8a0 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:57:14` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=f39984a8-3b43-4d4c-aa12-f78445d30056 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:57:16` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.mask_customer(` → SUCCEEDED
+- `2026-10-28 17:57:18` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.segment_filter` → SUCCEEDED
+- `2026-10-28 17:57:18` **step pipeline** 開始
+- `2026-10-28 17:58:49` **step uc_a** 開始
+- `2026-10-28 17:58:50` SQL `CREATE CATALOG IF NOT EXISTS serverless_stable_h87e9w_catalog` → FAILED (PERMISSION_DENIED: Principal 'Yoshitaka Kato' does not have CREATE CATALOG on Metastore 'metastore_aws_us_east_1'.)
+- `2026-10-28 17:58:52` SQL `CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud` → SUCCEEDED
+- `2026-10-28 17:58:53` SQL `CREATE VOLUME IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud.raw` → SUCCEEDED
+- `2026-10-28 17:58:55` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_analysts` → FAILED ([RequestId=32cdcf0f-255c-4919-bf58-46e8884e2782 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:58:56` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=3a0f6e5a-e3e6-416e-9eb6-d8de09ddc3f3 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_analysts.)
+- `2026-10-28 17:58:58` SQL `GRANT USE CATALOG ON CATALOG serverless_stable_h87e9w_catalog TO `fraud_viewers`` → FAILED ([RequestId=c8d388cc-4af2-48d1-adf4-fd0b071a7366 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:58:59` SQL `GRANT USE SCHEMA, SELECT ON SCHEMA serverless_stable_h87e9w_catalog.fraud TO `fr` → FAILED ([RequestId=3a7e883e-8736-44b4-a109-8047c6c54fa3 ErrorClass=PRINCIPAL_DOES_NOT_EXIST.PRINCIPAL_DOES_NOT_EXIST] Could not find principal with name fraud_viewers.)
+- `2026-10-28 17:59:01` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.mask_customer(` → SUCCEEDED
+- `2026-10-28 17:59:04` SQL `CREATE OR REPLACE FUNCTION serverless_stable_h87e9w_catalog.fraud.segment_filter` → SUCCEEDED
+- `2026-10-28 17:59:04` **step pipeline** 開始
+- `2026-10-28 17:59:12` Lakeflow パイプライン afe260e0-ca34-4d58-8fa1-8b04faccde4a 更新開始 update=4c93aafb-33b6-4b32-83c3-c677a8bf55e5
+- `2026-10-28 18:00:25` SQL `SELECT 'bronze_transactions' AS tbl, COUNT(*) AS n FROM serverless_stable_h87e9w` → SUCCEEDED
+- `2026-10-28 18:00:29` SQL `SELECT 'silver_transactions' AS tbl, COUNT(*) AS n FROM serverless_stable_h87e9w` → SUCCEEDED
+- `2026-10-28 18:00:32` SQL `SELECT 'gold_features' AS tbl, COUNT(*) AS n FROM serverless_stable_h87e9w_catal` → SUCCEEDED
+- `2026-10-28 18:00:32` Lakeflow 完了: bronze_transactions=60000, silver_transactions=60000, gold_features=60000
+- `2026-10-28 18:00:32` **step train** 開始
+- `2026-10-28 18:00:36` Job 実行開始 03_train_model run_id=1044881607833499
+- `2026-10-28 18:03:07` ML 学習完了: ROC-AUC=0.9034 SHAP加法性誤差=1.4551915228366852e-11 モデル=serverless_stable_h87e9w_catalog.fraud.fraud_gbdt v1
+- `2026-10-28 18:03:07` **step uc_b** 開始
+- `2026-10-28 18:03:10` SQL `ALTER TABLE serverless_stable_h87e9w_catalog.fraud.scored_transactions` → SUCCEEDED
+- `2026-10-28 18:03:12` SQL `ALTER TABLE serverless_stable_h87e9w_catalog.fraud.scored_transactions` → SUCCEEDED
+- `2026-10-28 18:03:23` SQL `SELECT source_table_full_name, target_table_full_name, entity_type, event_time` → SUCCEEDED
+- `2026-10-28 18:03:34` SQL `SELECT is_member('fraud_analysts_global') AS in_global, is_member('fraud_analyst` → SUCCEEDED
+- `2026-10-28 18:04:11` SQL `SELECT is_member('fraud_analysts_global') AS in_global, is_member('fraud_analyst` → SUCCEEDED
+- `2026-10-28 18:04:13` SQL `DESCRIBE TABLE EXTENDED serverless_stable_h87e9w_catalog.fraud.scored_transactio` → SUCCEEDED
+- `2026-10-28 18:04:15` SQL `SHOW GRANTS ON SCHEMA serverless_stable_h87e9w_catalog.fraud` → SUCCEEDED
+- `2026-10-28 18:04:19` SQL `SELECT customer_id, is_foreign, fraud_score FROM serverless_stable_h87e9w_catalo` → SUCCEEDED
+- `2026-10-28 18:04:19` **step memo** 開始
+- `2026-10-28 18:04:50` SQL `CREATE OR REPLACE TABLE serverless_stable_h87e9w_catalog.fraud.action_memos` → SUCCEEDED
+- `2026-10-28 18:04:53` SQL `SELECT txn_id, ROUND(fraud_score, 3) AS fraud_score, ev_block_jpy, memo` → SUCCEEDED
+- `2026-10-28 18:04:53` LLM 対応メモ生成（databricks-claude-sonnet-5）
+- `2026-10-28 18:05:23` **step lakebase** 開始
+- `2026-10-28 18:05:30` Lakebase ロール作成: yoshitaka.kato@databricks.com
+- `2026-10-28 18:06:29` **step lakebase** 開始
+- `2026-10-28 18:06:35` SQL `CREATE SCHEMA IF NOT EXISTS serverless_stable_h87e9w_catalog.fraud_ops COMMENT '` → SUCCEEDED
+- `2026-10-28 18:06:50` synced table 作成 serverless_stable_h87e9w_catalog.fraud_ops.fraud_alerts ← serverless_stable_h87e9w_catalog.fraud.scored_transactions_ops
+- `2026-10-28 18:07:03` synced table 作成 serverless_stable_h87e9w_catalog.fraud_ops.action_memos ← serverless_stable_h87e9w_catalog.fraud.action_memos
+- `2026-10-28 18:07:09` Job 実行開始 07_lakebase_sql run_id=301023657681548
+- `2026-10-28 18:08:18` SQL `SELECT COUNT(*) FROM serverless_stable_h87e9w_catalog.fraud.scored_transactions_` → SUCCEEDED
+- `2026-10-28 18:08:18` Lakebase 同期確認: Postgres fraud_alerts=[['613']] / Delta=[['613']]
+- `2026-10-28 18:08:18` **step app** 開始
+- `2026-10-28 18:08:21` App yoshitaka-kato-fraud-review 作成
+- `2026-10-28 18:11:07` Job 実行開始 07_lakebase_sql run_id=754702646405175
+- `2026-10-28 18:13:01` Job 実行開始 07_lakebase_sql run_id=119858472403481
+- `2026-10-28 18:14:07` App デプロイ完了 https://yoshitaka-kato-fraud-review-7474659820190227.aws.databricksapps.com / 自己チェック: [['2026-10-28 09:12:34.556763+00:00', '91f03d2b-a005-4ece-9827-ddbddd091f9d', '613', '50', '25']]
+- `2026-10-28 18:14:07` **step genie** 開始
+- `2026-10-28 18:14:09` Genie Space 作成 space_id=01f1d2afeea5141fbac4c8debfbe8cd7
+- `2026-10-28 18:14:35` Genie Q1 回答取得（会話 01f1d2aff03a167a8495199f4ee44bec、1 ターン）
+- `2026-10-28 18:14:59` Genie Q2 回答取得（会話 01f1d2affeea12f5836a822dea532e5e、1 ターン）
+- `2026-10-28 18:15:38` Genie Q3 回答取得（会話 01f1d2b00d861b78bf61e5348105e628、2 ターン）
+- `2026-10-28 18:16:08` Genie Q4 回答取得（会話 01f1d2b024cb1f4080eb64117e2397b2、1 ターン）
+- `2026-10-28 18:16:33` Genie Q5 回答取得（会話 01f1d2b036bb11ae823133cc43acb186、1 ターン）
+- `2026-10-28 18:16:52` Genie Q6 回答取得（会話 01f1d2b0455219b1bf0034454a67eb3f、1 ターン）
+- `2026-10-28 18:17:54` **step verify** 開始
+- `2026-10-28 18:18:01` Job 実行開始 07_lakebase_sql run_id=158182072155052
+- `2026-10-28 18:19:10` SQL `SELECT 'scored_transactions' t, COUNT(*) n FROM serverless_stable_h87e9w_catalog` → SUCCEEDED
+- `2026-10-28 18:19:12` SQL `SELECT 'scored_transactions_ops' t, COUNT(*) n FROM serverless_stable_h87e9w_cat` → SUCCEEDED
+- `2026-10-28 18:19:14` SQL `SELECT 'action_memos' t, COUNT(*) n FROM serverless_stable_h87e9w_catalog.fraud.` → SUCCEEDED
+- `2026-10-28 18:19:20` SQL `SELECT source_table_full_name, target_table_full_name FROM system.access.table_l` → SUCCEEDED
+- `2026-10-28 18:19:20` 最終確認: synced=fraud_alerts:SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE, action_memos:SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE / app=RUNNING / Postgres=[[['613']], [['BLOCK_CANDIDATE', '156'], ['REVIEW', '457']], [['50']]]
