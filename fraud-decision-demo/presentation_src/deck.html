@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>不正送金レビュー支援</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --ink:#0f1729;
+  --muted:#5a6577; --hair:#dde2ea; --accent:#0d9488; --accent-soft:#99f6e4;
+  --risk:#dc2626; --save:#15803d; --shadow:0 1px 3px rgba(15,23,41,.06),0 8px 30px rgba(15,23,41,.06);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a0e16; --surface:#131a26; --surface-2:#0f1523; --ink:#e8ebf2;
+    --muted:#8b97ab; --hair:#232c3b; --accent:#2dd4bf; --accent-soft:#134e4a;
+    --risk:#f87171; --save:#4ade80; --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a0e16; --surface:#131a26; --surface-2:#0f1523; --ink:#e8ebf2;
+  --muted:#8b97ab; --hair:#232c3b; --accent:#2dd4bf; --accent-soft:#134e4a;
+  --risk:#f87171; --save:#4ade80; --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;font-size:17px}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:600;text-wrap:balance;line-height:1.12;margin:0}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);
+  font-weight:600;margin:0 0 18px}
+.slide{max-width:1080px;margin:0 auto;padding:104px 32px;border-bottom:1px solid var(--hair)}
+.slide:last-child{border-bottom:none}
+p{color:var(--muted);max-width:64ch}
+.lead{font-size:20px;color:var(--ink)}
+strong{color:var(--ink)}
+.accent{color:var(--accent)}.risk{color:var(--risk)}.save{color:var(--save)}
+
+/* hero */
+.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;
+  padding-top:80px;padding-bottom:80px}
+.hero h1{font-size:clamp(38px,6.2vw,74px);letter-spacing:-.01em}
+.hero .sub{font-size:clamp(18px,2.2vw,23px);margin-top:26px;max-width:58ch}
+.tagrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:40px}
+.tag{font-size:12.5px;font-weight:600;padding:7px 14px;border:1px solid var(--hair);
+  border-radius:100px;color:var(--muted);background:var(--surface)}
+.tag.on{background:var(--accent);border-color:var(--accent);color:#022c26}
+.headline-net{margin-top:52px;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.headline-net .big{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(46px,8vw,92px);
+  color:var(--save);line-height:1}
+.headline-net .cap{color:var(--muted);font-size:16px;max-width:22ch}
+
+/* kpi grid */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:8px}
+.kpi{background:var(--surface);border:1px solid var(--hair);border-radius:16px;
+  padding:26px 22px;box-shadow:var(--shadow)}
+.kpi .v{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(30px,3.6vw,44px);
+  line-height:1;letter-spacing:-.01em}
+.kpi .l{color:var(--muted);font-size:14px;margin-top:12px}
+.kpi .d{font-size:12.5px;margin-top:8px;font-weight:600}
+
+/* compare table */
+.cmp{width:100%;border-collapse:collapse;margin-top:26px;font-size:15.5px}
+.cmp th,.cmp td{padding:14px 16px;border-bottom:1px solid var(--hair);text-align:right}
+.cmp th:first-child,.cmp td:first-child{text-align:left;color:var(--ink);font-weight:500}
+.cmp thead th{color:var(--muted);font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.cmp .now{color:var(--muted)}
+.cmp .new{color:var(--ink);font-weight:600}
+.cmp .win{color:var(--save);font-weight:600}
+
+/* journey */
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:36px}
+.step{position:relative;padding:22px 16px 22px 20px;border-left:3px solid var(--accent);
+  background:var(--surface-2)}
+.step:not(:last-child){margin-right:2px}
+.step .n{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600}
+.step .t{font-weight:600;margin-top:6px;font-size:15px}
+.step .s{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.45}
+
+/* cockpit example */
+.panel{background:var(--surface);border:1px solid var(--hair);border-radius:16px;
+  padding:28px;box-shadow:var(--shadow);margin-top:8px}
+.reason{display:flex;align-items:center;gap:14px;margin:10px 0}
+.reason .lab{width:230px;font-size:14.5px;flex-shrink:0}
+.reason .track{flex:1;height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.reason .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--risk))}
+.reason .c{font-family:"IBM Plex Mono",monospace;font-weight:600;width:64px;text-align:right;font-size:14px}
+.ev{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px;align-items:baseline}
+.ev .formula{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--muted)}
+.ev .res{font-family:"Fraunces",serif;font-size:34px;font-weight:600;color:var(--risk)}
+.callout{border-left:3px solid var(--accent);padding:6px 0 6px 18px;margin-top:22px;color:var(--ink)}
+
+/* two column value */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:20px}
+.col{background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+.col h3{font-size:22px;margin-bottom:6px}
+.col .role{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.col ul{margin:16px 0 0;padding-left:18px}
+.col li{margin:10px 0;color:var(--muted)}
+.col li strong{color:var(--ink)}
+
+footer{max-width:1080px;margin:0 auto;padding:48px 32px 90px;color:var(--muted);font-size:13.5px}
+.mini{font-size:13px;color:var(--muted);margin-top:14px}
+@media(max-width:820px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .flow{grid-template-columns:1fr 1fr}
+  .two{grid-template-columns:1fr}
+  .reason .lab{width:150px}
+  .slide{padding:72px 22px}
+}
+
+/* PDF出力用: 1スライド=1ページ (16:9)、ライトテーマ固定 */
+@page{size:1280px 720px;margin:0}
+@media print{
+  :root,:root:not([data-theme="light"]){
+    --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --ink:#0f1729;
+    --muted:#5a6577; --hair:#dde2ea; --accent:#0d9488; --accent-soft:#99f6e4;
+    --risk:#dc2626; --save:#15803d; --shadow:none;
+  }
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:"IBM Plex Sans","Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;font-size:15px}
+  h1,h2,h3{font-family:"Fraunces","Hiragino Mincho ProN",Georgia,serif}
+  .slide{width:1280px;height:720px;max-width:none;margin:0;padding:52px 72px;border:none;
+    overflow:hidden;page-break-after:always;break-after:page;
+    display:flex;flex-direction:column;justify-content:center}
+  .slide h2{font-size:34px !important}
+  .kpis{grid-template-columns:repeat(4,1fr) !important}
+  .flow{grid-template-columns:repeat(6,1fr) !important}
+  .two{grid-template-columns:1fr 1fr}
+  .reason .lab{width:230px}
+  p{max-width:72ch}
+  .hero{min-height:0;padding-top:52px;padding-bottom:52px}
+  .hero h1{font-size:58px}
+  .hero .sub{font-size:19px}
+  .headline-net{margin-top:32px}
+  .headline-net .big{font-size:76px}
+  .tagrow{margin-top:28px}
+  .kpis{margin-top:22px !important}
+  .kpi{padding:18px 18px}
+  .kpi .v{font-size:36px}
+  .cmp{margin-top:16px;font-size:14px}
+  .cmp th,.cmp td{padding:8px 14px}
+  .panel{padding:22px 26px}
+  .reason{margin:6px 0}
+  .ev{margin-top:14px}
+  .ev .res{font-size:30px}
+  .two{margin-top:18px}
+  .col{padding:22px}
+  .col li{margin:6px 0}
+  .lead{font-size:18px}
+  footer{position:absolute;left:0;bottom:0;width:1280px;max-width:none;padding:0 72px 20px;font-size:11px}
+  body{position:relative}
+  section.slide:last-of-type{page-break-after:auto;break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- 1. HERO / THESIS -->
+<section class="slide hero">
+  <p class="eyebrow">金融サービス — 不正送金対策 / クラシックML × Databricks</p>
+  <h1>属人的な不正判断を、<br>説明可能で標準化された運用へ。</h1>
+  <p class="sub">不正検知スコアに「なぜ止めるべきか」という理由コードと期待金額価値を添え、
+    アナリストの最終判断を一貫・高速・監査可能にする。データ取り込みからアプリ公開までを1つのプラットフォームで。</p>
+  <div class="headline-net">
+    <span class="big num">+1.0<span style="font-size:.5em">億円</span></span>
+    <span class="cap">レビュー運用のネット金額改善（年換算・現状比）</span>
+  </div>
+  <div class="tagrow">
+    <span class="tag on">Lakeflow</span><span class="tag on">Unity Catalog</span>
+    <span class="tag on">Lakebase</span><span class="tag on">クラシックML + SHAP</span>
+    <span class="tag on">Genie</span><span class="tag on">Databricks Apps</span>
+  </div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section class="slide">
+  <p class="eyebrow">01 — 現場の課題</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">「本当に送金を止めるべきか」の判断が、人によってばらつく。</h2>
+  <p class="lead" style="margin-top:22px">不正検知モデルは「不正確率0.72」とだけ返す。<strong>なぜ高いのかが業務ユーザに見えない</strong>ため、
+    最終判断は担当者の経験と勘に依存し、標準化されていない。</p>
+  <div class="two" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="col"><div class="role">見逃しリスク</div><h3 class="risk">損失</h3>
+      <p style="margin-top:10px">止めるべき不正を通してしまえば、そのまま資金が流出する。</p></div>
+    <div class="col"><div class="role">誤検知リスク</div><h3 class="risk">顧客摩擦</h3>
+      <p style="margin-top:10px">正当な送金を止めれば問い合わせ・信頼低下・離反を招く。現状は年 <strong>約7.3万件</strong> 相当。</p></div>
+    <div class="col"><div class="role">オペレーション</div><h3 class="risk">工数と属人化</h3>
+      <p style="margin-top:10px">広いルールが大量のアラートを生み、理由なしのレビューに <strong>年1.8万時間</strong> 級を消費。</p></div>
+  </div>
+</section>
+
+<!-- 3. OUTCOME KPIs -->
+<section class="slide">
+  <p class="eyebrow">02 — ビジネス成果（購入者KPIへのインパクト・年換算）</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">効率・摩擦・一貫性を同時に改善する。</h2>
+  <div class="kpis" style="margin-top:32px">
+    <div class="kpi"><div class="v save num">+1.0<span style="font-size:.5em">億円</span></div>
+      <div class="l">ネット金額改善 / 年</div><div class="d save">不正阻止 − 摩擦 − 人件費</div></div>
+    <div class="kpi"><div class="v accent num">2.3<span style="font-size:.5em">億円</span></div>
+      <div class="l">顧客摩擦コスト削減 / 年</div><div class="d save">誤検知 −7.3万件</div></div>
+    <div class="kpi"><div class="v accent num">1.7<span style="font-size:.5em">万h</span></div>
+      <div class="l">調査時間削減 / 年</div><div class="d save">レビュー 5,719 → 497 件 (−91%)</div></div>
+    <div class="kpi"><div class="v num">97.7<span style="font-size:.5em">%</span></div>
+      <div class="l">判断標準化率</div><div class="d accent">残りだけ人が理由付きで判断</div></div>
+  </div>
+  <table class="cmp">
+    <thead><tr><th>指標（ホールドアウト18,000件）</th><th>現状：ルール＋属人</th><th>提案：ML＋理由コード</th><th>変化</th></tr></thead>
+    <tbody>
+      <tr><td>人手レビュー件数</td><td class="now num">5,719</td><td class="new num">497</td><td class="win">−91%</td></tr>
+      <tr><td>誤検知（顧客摩擦）件数</td><td class="now num">5,395</td><td class="new num">11</td><td class="win">−99.8%</td></tr>
+      <tr><td>総調査時間</td><td class="now num">1,334 h</td><td class="new num">41 h</td><td class="win">−97%</td></tr>
+      <tr><td>ネット金額インパクト</td><td class="now num">1,376万円</td><td class="new num">2,131万円</td><td class="win">+55%</td></tr>
+    </tbody>
+  </table>
+  <p class="mini">前提: 誤検知コスト 3,200円/件、調査 14分→5分/件、人件費 60円/分。モデル ROC-AUC ≈ 0.89。全て合成データ。
+    ※現状ルールは全取引の約1/3をフラグして粗く多く捕捉するが、摩擦と工数が支配的で経済的には劣る。</p>
+</section>
+
+<!-- 4. HOW / JOURNEY -->
+<section class="slide">
+  <p class="eyebrow">03 — 仕組み：分断のない1つのデータジャーニー</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">生データからアプリ公開まで、1プラットフォームで。</h2>
+  <div class="flow">
+    <div class="step"><div class="n">01</div><div class="t">Lakeflow</div><div class="s">送金生データを bronze→silver→gold に宣言的に取り込み</div></div>
+    <div class="step"><div class="n">02</div><div class="t">Unity Catalog</div><div class="s">スキーマ・PIIマスク・権限・リネージを一元統制</div></div>
+    <div class="step"><div class="n">03</div><div class="t">クラシックML</div><div class="s">勾配ブースティング＋SHAPで理由コードを付与</div></div>
+    <div class="step"><div class="n">04</div><div class="t">Lakebase</div><div class="s">スコアと理由を低遅延Postgresへ同期し運用化</div></div>
+    <div class="step"><div class="n">05</div><div class="t">Genie</div><div class="s">全体傾向を日本語で探索し運用改善へ</div></div>
+    <div class="step"><div class="n">06</div><div class="t">Databricks Apps</div><div class="s">理由＋EV＋判断を1画面で業務に公開</div></div>
+  </div>
+  <p style="margin-top:28px" class="lead"><strong>解釈性</strong>はML（個票の「なぜ止めるか」）、<strong>探索</strong>はGenie（全体の「なぜこの傾向か」）と
+    役割を分け、両輪で属人化を解消する。</p>
+</section>
+
+<!-- 5. COCKPIT / INTERPRETABILITY -->
+<section class="slide">
+  <p class="eyebrow">04 — 意思決定コックピット（Databricks App）</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">スコアではなく「理由」と「金額」で判断する。</h2>
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;align-items:baseline">
+      <div><strong class="num">取引 T0022047</strong> ・ 送金 <span class="num">119,536円</span> ・ 宛先 <span class="num">XA（高リスク国）</span></div>
+      <div>不正スコア <span class="num risk" style="font-size:22px;font-weight:700">0.923</span></div>
+    </div>
+    <div style="margin-top:18px">
+      <div class="reason"><div class="lab">高リスク国宛の送金</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="c">+1.66</div></div>
+      <div class="reason"><div class="lab">普段と異なる端末</div><div class="track"><div class="fill" style="width:75%"></div></div><div class="c">+1.25</div></div>
+      <div class="reason"><div class="lab">送金額が平常比 2.2倍</div><div class="track"><div class="fill" style="width:75%"></div></div><div class="c">+1.25</div></div>
+    </div>
+    <div class="ev">
+      <div><div class="formula">EV = スコア × 金額 − (1−スコア) × 誤検知コスト</div>
+        <div style="margin-top:6px" class="formula">= 0.923 × 119,536 − 0.077 × 3,200</div></div>
+      <div><div class="res num">+110,078円</div><div class="formula">→ 🔴 ブロック推奨</div></div>
+    </div>
+    <p class="callout">加法的分解は厳密（<span class="num">baseline + Σ寄与 = logit</span>、検算誤差 ~1e-15）。
+      「なぜ止めたか」を機械的に説明でき、規制・監査に耐える。</p>
+  </div>
+  <p class="mini">誤検知の見極めも同じ画面で: 例）正当な高額海外送金はスコアが高くても理由コードとEVで解放判断でき、無用な摩擦を避けられる。</p>
+</section>
+
+<!-- 6. GENIE INSIGHT -->
+<section class="slide">
+  <p class="eyebrow">05 — Genie による全体探索（自然言語）</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">「海外と国内で的中率は？」— 日本語の質問が運用改善になる。</h2>
+  <div class="two">
+    <div class="col"><div class="role">Genieへの質問</div>
+      <h3>海外送金と国内で、レビュー帯の的中率を比較して</h3>
+      <ul>
+        <li>海外セグメント： 的中率 <strong class="num accent">0.49</strong>（レビュー272件）</li>
+        <li>国内セグメント： 的中率 <strong class="num">0.25</strong>（レビュー225件）</li>
+      </ul>
+      <p style="margin-top:14px">→ <strong>海外送金にレビュー資源を厚く</strong>配分すべき、という運用示唆が即座に得られる。</p>
+    </div>
+    <div class="col"><div class="role">同時に答えられる問い</div>
+      <h3>現場が毎日聞きたいこと</h3>
+      <ul>
+        <li>判定ポリシー別の件数・平均スコア・合計金額は？</li>
+        <li>深夜に不正は偏る？（→ 深夜帯が最多）</li>
+        <li>端末変更ありは不正率が何倍高い？</li>
+        <li>未判定のブロック候補は何件、いくら止められる？</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7. VALUE / NEXT -->
+<section class="slide">
+  <p class="eyebrow">06 — 誰にとっての価値か</p>
+  <h2 style="font-size:clamp(28px,4vw,44px)">スポンサーとドメインオーナー、双方の言葉で。</h2>
+  <div class="two">
+    <div class="col"><div class="role">エグゼクティブ・スポンサー</div>
+      <h3>P&L と規制対応</h3>
+      <ul>
+        <li><strong>年 +1.0億円</strong>のネット改善と <strong>2.3億円</strong>の摩擦コスト削減</li>
+        <li>すべての判断が<strong>説明可能・監査可能</strong>（規制対応リスクの低減）</li>
+        <li>単一プラットフォームで <strong>TCOと運用の分断を削減</strong></li>
+      </ul>
+    </div>
+    <div class="col"><div class="role">ドメインオーナー（不正調査部門）</div>
+      <h3>現場の意思決定</h3>
+      <ul>
+        <li>レビュー件数 <strong>−91%</strong>、1件あたり <strong>14→5分</strong></li>
+        <li>スコアの裏に<strong>理由コードとEV</strong>があり、判断が標準化・高速化</li>
+        <li>Genieで<strong>自分でデータに問える</strong>（データ部門待ちが不要）</li>
+      </ul>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:34px">次の一歩：本番データで PoC → しきい値とコスト前提を自社KPIに合わせて較正 →
+    Lakebase同期とApp本番化。<strong>2〜4週間</strong>で意思決定コックピットを立ち上げる。</p>
+</section>
+
+<footer>
+  不正送金レビュー支援 — エンドツーエンド・データジャーニー（金融 / クラシックML）。
+  数値はすべて合成データに基づく試算で、前提は <span class="num">src/common.py</span> に一元化。実顧客データ・PIIは不使用。
+</footer>
+
+</body>
+</html>

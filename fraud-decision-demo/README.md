@@ -55,7 +55,13 @@ python3 app/local_app.py   # レビュー支援アプリ -> http://127.0.0.1:800
 `databricks/README.md` に配備手順と **ローカル↔Databricks の1:1対応表** を記載。
 
 ## 📑 プレゼン資料
-`presentation/deck.html`（ビジネス成果を冒頭に、KPI定量化、購入者/スポンサー価値）。
+`presentation/deck.pdf`（16:9・7枚。ビジネス成果を冒頭に、KPI定量化、購入者/スポンサー価値）。
+編集元は `presentation_src/deck.html`。修正後は Chrome headless で再出力:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --no-pdf-header-footer \
+  --print-to-pdf=presentation/deck.pdf "file://$PWD/presentation_src/deck.html"
+```
 
 ## ⚠️ データについて
 すべて**合成データ**（`src/generate_data.py`）。実在の顧客・PII・実データは一切含まない。
@@ -68,5 +74,6 @@ databricks/  Lakeflow/UC/ML(SHAP)/Lakebase/Genie のネイティブ実装と配�
 outputs/     実行結果（メトリクス・理由コード・KPI・Genie回答・App証跡）★実行証拠
 logs/        run_all.log（全工程の実行ログ）★実行証拠
 data/        合成データと運用ストア(sqlite)
-presentation/ 経営層向けデッキ
+presentation/ 経営層向けデッキ（PDF）
+presentation_src/ デッキの編集元HTML
 ```
